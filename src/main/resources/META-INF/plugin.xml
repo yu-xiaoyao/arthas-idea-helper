@@ -16,6 +16,9 @@
                 <runConfigurationExtension
                         implementation="com.github.yuxiaoyao.arthasideaplugin.runconfig.ArthasRunConfigurationExtension"/>
         -->
+        <applicationConfigurable
+                instance="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSearchableConfigurable"
+        />
 
 
         <programRunner implementation="com.github.yuxiaoyao.arthasideahelper.runner.ArthasProgramRunner"/>
