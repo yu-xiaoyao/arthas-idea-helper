@@ -1,15 +1,27 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.yuxiaoyao.arthasideahelper</id>
-    <name>arthas-idea-helper</name>
+    <name>Arthas Idea Helper</name>
     <vendor>yu-xiaoyao</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends optional="true">com.intellij.spring.boot</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.yuxiaoyao.arthasideahelper.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
-        <postStartupActivity implementation="com.github.yuxiaoyao.arthasideahelper.startup.MyProjectActivity" />
+
+        <!--
+                <runConfigurationExtension
+                        implementation="com.github.yuxiaoyao.arthasideaplugin.runconfig.ArthasRunConfigurationExtension"/>
+        -->
+
+
+        <programRunner implementation="com.github.yuxiaoyao.arthasideahelper.runner.ArthasProgramRunner"/>
+        <executor id="ArthasExecutor"
+                  implementation="com.github.yuxiaoyao.arthasideahelper.executor.ArthasExecutor" order="last"/>
+
+
     </extensions>
 </idea-plugin>
