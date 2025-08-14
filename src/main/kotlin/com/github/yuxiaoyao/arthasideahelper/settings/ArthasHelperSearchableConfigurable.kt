@@ -1,61 +1,66 @@
 package com.github.yuxiaoyao.arthasideahelper.settings
 
 import com.github.yuxiaoyao.arthasideahelper.MyBundle
-import com.github.yuxiaoyao.arthasideahelper.PLUGIN_ID
-import com.intellij.openapi.options.SearchableConfigurable
-import com.intellij.openapi.util.NlsContexts
-import org.jetbrains.annotations.NonNls
-import javax.swing.*
-
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.options.BoundConfigurable
+import com.intellij.openapi.ui.DialogPanel
+import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.ui.dsl.builder.AlignX
+import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.panel
 
 /**
  * @author kerryzhang on 2025/08/14
  */
+class ArthasHelperSearchableConfigurable : BoundConfigurable(MyBundle.message("pluginName")) {
 
-class ArthasHelperSearchableConfigurable : SearchableConfigurable {
+    private val settings = ArthasHelperSettings.getInstance()
 
-    private val mainPanel: JPanel
-    private val usernameField: JTextField
-    private val enableFeatureCheckBox: JCheckBox
 
-    init {
-        mainPanel = JPanel()
-        mainPanel.setLayout(BoxLayout(mainPanel, BoxLayout.Y_AXIS))
+    override fun createPanel(): DialogPanel {
+        val fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor().apply {
+            title = MyBundle.message("settings.arthasAgentPath.chooser")
+            description = MyBundle.message("settings.arthasAgentPath.comment")
+            withFileFilter { file ->
+                file.extension.equals("jar", ignoreCase = true)
+            }
+        }
 
-        usernameField = JTextField()
-        enableFeatureCheckBox = JCheckBox("Enable Feature")
-
-        mainPanel.add(JLabel("Username:"))
-        mainPanel.add(usernameField)
-        mainPanel.add(enableFeatureCheckBox)
+        return panel {
+            row(MyBundle.message("settings.arthasAgentPath") + ":") {
+                textFieldWithBrowseButton(
+                    fileChooserDescriptor,
+                    null,
+                    fileChosen = { vf -> vf.path }
+                )
+                    .bindText(settings::arthasAgentPath)
+                    .comment(MyBundle.message("settings.arthasAgentPath.comment"))
+                    .align(AlignX.FILL)
+                    .validationOnInput {
+                        validateJarPath(it.text)
+                    }
+                    .validationOnApply {
+                        validateJarPath(it.text)
+                    }
+            }
+        }
     }
 
-    override fun getId(): @NonNls String {
-        return PLUGIN_ID
+    private fun validateJarPath(path: String): ValidationInfo? {
+        if (path.isBlank()) {
+            // 路径不能为空
+            return ValidationInfo(MyBundle.message("file.pathEmpty"))
+        }
+        val file = java.io.File(path)
+        if (!file.exists() || !file.isFile) {
+            // 文件不存在
+            return ValidationInfo(MyBundle.message("file.fileNotExist"))
+        }
+        if (!path.endsWith(".jar", ignoreCase = true)) {
+            // 必须选择 .jar 文件
+            return ValidationInfo(MyBundle.message("file.fileNotJar"))
+        }
+        return null
     }
 
-    override fun getDisplayName(): @NlsContexts.ConfigurableName String {
-        return MyBundle.message("pluginName")
-    }
-
-    override fun createComponent(): JComponent? {
-        reset(); // 初始化 UI
-        return mainPanel;
-    }
-
-    override fun isModified(): Boolean {
-        // 判断 UI 值是否和当前配置不同
-        return !usernameField.getText().equals(ArthasHelperSettings.username) ||
-                enableFeatureCheckBox.isSelected != ArthasHelperSettings.enableFeature;
-    }
-
-    override fun apply() {
-        ArthasHelperSettings.username = usernameField.getText();
-        ArthasHelperSettings.enableFeature = enableFeatureCheckBox.isSelected
-    }
-
-    override fun reset() {
-        usernameField.text = ArthasHelperSettings.username;
-        enableFeatureCheckBox.setSelected(ArthasHelperSettings.enableFeature)
-    }
 }

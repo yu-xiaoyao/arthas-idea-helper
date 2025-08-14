@@ -1,6 +1,5 @@
 package com.github.yuxiaoyao.arthasideahelper.runconfig
 
-import com.github.yuxiaoyao.arthasideahelper.util.ArthasUtil
 import com.intellij.execution.RunConfigurationExtension
 import com.intellij.execution.application.ApplicationConfiguration
 import com.intellij.execution.configurations.JavaParameters
@@ -18,10 +17,6 @@ import javax.swing.JPanel
  */
 class ArthasRunConfigurationExtension : RunConfigurationExtension() {
 
-    companion object {
-        private const val ARTHAS_ENABLED_KEY = "arthas.enabled"
-        private const val ARTHAS_AGENT_PATH_KEY = "arthas.agent.path"
-    }
 
     override fun <T : RunConfigurationBase<*>?> updateJavaParameters(
         configuration: T,
@@ -52,11 +47,7 @@ class ArthasRunConfigurationExtension : RunConfigurationExtension() {
 
     override fun readExternal(runConfiguration: RunConfigurationBase<*>, element: Element) {
         if (runConfiguration is ApplicationConfiguration) {
-            val enabled = element.getAttributeValue(ARTHAS_ENABLED_KEY)?.toBoolean() ?: false
-            val agentPath = element.getAttributeValue(ARTHAS_AGENT_PATH_KEY) ?: ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH
 
-            runConfiguration.putUserData(ArthasUserDataKeys.ARTHAS_ENABLED, enabled)
-            runConfiguration.putUserData(ArthasUserDataKeys.ARTHAS_AGENT_PATH, agentPath)
         }
     }
 
@@ -65,8 +56,7 @@ class ArthasRunConfigurationExtension : RunConfigurationExtension() {
             val enabled = isArthasEnabled(runConfiguration)
             val agentPath = getArthasAgentPath(runConfiguration)
 
-            element.setAttribute(ARTHAS_ENABLED_KEY, enabled.toString())
-            element.setAttribute(ARTHAS_AGENT_PATH_KEY, agentPath)
+
         }
     }
 
@@ -75,7 +65,7 @@ class ArthasRunConfigurationExtension : RunConfigurationExtension() {
     }
 
     private fun getArthasAgentPath(configuration: ApplicationConfiguration): String {
-        return configuration.getUserData(ArthasUserDataKeys.ARTHAS_AGENT_PATH) ?: ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH
+        return ""
     }
 
     /**
@@ -100,10 +90,7 @@ class ArthasRunConfigurationExtension : RunConfigurationExtension() {
             if (configuration is ApplicationConfiguration) {
                 configuration.putUserData(ArthasUserDataKeys.ARTHAS_ENABLED, enableArthasCheckBox.isSelected)
                 if (enableArthasCheckBox.isSelected) {
-                    configuration.putUserData(
-                        ArthasUserDataKeys.ARTHAS_AGENT_PATH,
-                        ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH
-                    )
+
                 }
             }
         }

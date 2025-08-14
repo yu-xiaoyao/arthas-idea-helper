@@ -1,9 +1,10 @@
 package com.github.yuxiaoyao.arthasideahelper.runner
 
+import com.github.yuxiaoyao.arthasideahelper.MyBundle
 import com.github.yuxiaoyao.arthasideahelper.executor.ArthasExecutor
-import com.github.yuxiaoyao.arthasideahelper.pluginId
-import com.github.yuxiaoyao.arthasideahelper.runconfig.ArthasUserDataKeys
-import com.github.yuxiaoyao.arthasideahelper.util.ArthasUtil
+import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSearchableConfigurable
+import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings
+import com.github.yuxiaoyao.arthasideahelper.utils.ArthasUtils
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.application.ApplicationConfiguration
 import com.intellij.execution.configurations.RunProfile
@@ -16,11 +17,13 @@ import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.concurrency.Promise
+import com.intellij.execution.configurations.CommandLineTokenizer
 
 /**
  * @author Kerry2 on 2025/08/07
@@ -72,28 +75,81 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
         val project = environment.project
         when (val runProfile = environment.runProfile) {
             is ApplicationConfiguration -> {
-                val pluginPath = com.intellij.ide.plugins.PluginManagerCore.getPlugin(pluginId)?.pluginPath
+                this.setupArthasAgent(project, runProfile)
 
-
-                val arthasEnabled =
-                    runProfile.getUserData(ArthasUserDataKeys.ARTHAS_ENABLED) ?: ArthasUtil.ARTHAS_ENABLED
-                logger.info("Arthas enabled: $arthasEnabled - $pluginPath")
-                if (arthasEnabled) {
-                    validateArthasAgent(project, ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH)
-                    addArthasAgentToConfiguration(runProfile)
-                }
+//                val pluginPath = com.intellij.ide.plugins.PluginManagerCore.getPlugin(pluginId)?.pluginPath
+//                val arthasEnabled =
+//                    runProfile.getUserData(ArthasUserDataKeys.ARTHAS_ENABLED) ?: ArthasUtil.ARTHAS_ENABLED
+//                logger.info("Arthas enabled: $arthasEnabled - $pluginPath")
+//                if (arthasEnabled) {
+//                    validateArthasAgent(project, ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH)
+//                }
             }
         }
     }
+
+    private fun setupArthasAgent(project: Project, runProfile: ApplicationConfiguration) {
+        val arthasAgentPath = ArthasHelperSettings.getInstance().arthasAgentPath
+
+        if (arthasAgentPath.isBlank()) {
+            openSettings(project)
+            return
+        }
+        val file = java.io.File(arthasAgentPath)
+        if (!file.exists() || !file.extension.endsWith("jar", ignoreCase = true)) {
+            openSettings(project)
+            return
+        }
+        addArthasAgentToConfiguration(runProfile, arthasAgentPath)
+    }
+
+
+    /**
+     * Add Arthas agent to regular ApplicationConfiguration
+     */
+    private fun addArthasAgentToConfiguration(configuration: ApplicationConfiguration, agentPath: String) {
+        // Use ArthasUtil to add agent parameters
+        val currentVmParams = configuration.vmParameters
+
+
+        val tokenizer = CommandLineTokenizer(currentVmParams)
+        while (tokenizer.hasMoreTokens()) {
+            logger.info("TOKEN = ${tokenizer.nextToken()}")
+        }
+
+
+        val newVmParams = ArthasUtils.addArthasAgentToVmParameters(currentVmParams, agentPath)
+        configuration.vmParameters = newVmParams
+    }
+
+
+    private fun openSettings(project: Project) {
+        val result = Messages.showYesNoDialog(
+            project,
+            MyBundle.message("agent.missing.message"),
+            MyBundle.message("agent.missing"),
+            Messages.getQuestionIcon()
+        )
+        if (result == Messages.YES) {
+            ShowSettingsUtil.getInstance().showSettingsDialog(
+                project,
+                ArthasHelperSearchableConfigurable::class.java
+            )
+        } else {
+            throw ExecutionException("Arthas agent not found")
+        }
+
+    }
+
 
     /**
      * Validate that Arthas agent exists and is accessible
      */
     private fun validateArthasAgent(project: Project, agentPath: String) {
-        if (!ArthasUtil.validateArthasAgent(agentPath)) {
+        if (!ArthasUtils.validateArthasAgent(agentPath)) {
             val result = Messages.showYesNoDialog(
                 project,
-                ArthasUtil.getMissingAgentMessage(agentPath) + "\n\nWould you like to select the Arthas agent JAR file?",
+                ArthasUtils.getMissingAgentMessage(agentPath) + "\n\nWould you like to select the Arthas agent JAR file?",
                 "Arthas Agent Not Found",
                 Messages.getQuestionIcon()
             )
@@ -133,19 +189,5 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
             throw ExecutionException("No Arthas agent selected")
         }
     }
-
-    /**
-     * Add Arthas agent to regular ApplicationConfiguration
-     */
-    private fun addArthasAgentToConfiguration(configuration: ApplicationConfiguration) {
-        val agentPath = configuration.getUserData(ArthasUserDataKeys.ARTHAS_AGENT_PATH)
-            ?: ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH
-
-        // Use ArthasUtil to add agent parameters
-        val currentVmParams = configuration.vmParameters
-        val newVmParams = ArthasUtil.addArthasAgentToVmParameters(currentVmParams, agentPath)
-        configuration.vmParameters = newVmParams
-    }
-
 
 }

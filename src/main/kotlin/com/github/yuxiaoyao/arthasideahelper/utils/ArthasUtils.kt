@@ -1,18 +1,64 @@
-package com.github.yuxiaoyao.arthasideahelper.util
+package com.github.yuxiaoyao.arthasideahelper.utils
 
+import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import java.io.File
 
 /**
- * Utility class for Arthas-related operations
+ * Arthas 工具类
+ * @author kerryzhang on 2025/08/14
  */
-object ArthasUtil {
+object ArthasUtils {
 
-    const val ARTHAS_ENABLED = true
+    /**
+     * 获取 Arthas Agent 路径
+     */
+    fun getArthasAgentPath(): String {
+        return ArthasHelperSettings.getInstance().arthasAgentPath
+    }
 
-    // const val DEFAULT_ARTHAS_AGENT_PATH = "D:\\Code\\github-yu\\arthas-idea-plugin\\lib\\arthas\\arthas-agent.jar"
-    const val DEFAULT_ARTHAS_AGENT_PATH = "C:\\App\\0DevApp\\arthas-4.0.5\\arthas-agent.jar"
+    /**
+     * 检查 Arthas Agent 路径是否有效
+     */
+    fun isArthasAgentPathValid(): Boolean {
+        val path = getArthasAgentPath()
+        if (path.isBlank()) {
+            return false
+        }
+
+        val file = File(path)
+        return file.exists() && file.isFile && file.name.endsWith(".jar")
+    }
+
+    /**
+     * 验证 Arthas Agent 路径，如果无效则显示错误消息
+     */
+    fun validateArthasAgentPath(project: Project?): Boolean {
+        if (!isArthasAgentPathValid()) {
+            Messages.showErrorDialog(
+                project,
+                "请先在设置中配置有效的 arthas-agent.jar 路径\n" +
+                        "路径: File -> Settings -> Tools -> Arthas Idea Helper",
+                "Arthas Agent 路径未配置"
+            )
+            return false
+        }
+        return true
+    }
+
+    /**
+     * 获取 Arthas Agent 启动命令参数
+     */
+    fun getArthasAgentJvmArgs(): String {
+        val agentPath = getArthasAgentPath()
+        return if (agentPath.isNotBlank()) {
+            "-javaagent:$agentPath"
+        } else {
+            ""
+        }
+    }
+
 
     /**
      * Validate if Arthas agent exists at the given path
@@ -71,4 +117,5 @@ object ArthasUtil {
     fun generateArthasAgentId(): String {
         return "arthas-${System.currentTimeMillis()}"
     }
+
 }

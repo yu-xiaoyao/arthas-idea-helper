@@ -6,7 +6,9 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
-    <depends optional="true">com.intellij.spring.boot</depends>
+    <!--
+        <depends optional="true">com.intellij.spring.boot</depends>
+    -->
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
@@ -16,15 +18,16 @@
                 <runConfigurationExtension
                         implementation="com.github.yuxiaoyao.arthasideaplugin.runconfig.ArthasRunConfigurationExtension"/>
         -->
+        <applicationService
+                serviceImplementation="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings"/>
+
         <applicationConfigurable
                 instance="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSearchableConfigurable"
         />
 
-
         <programRunner implementation="com.github.yuxiaoyao.arthasideahelper.runner.ArthasProgramRunner"/>
         <executor id="ArthasExecutor"
                   implementation="com.github.yuxiaoyao.arthasideahelper.executor.ArthasExecutor" order="last"/>
-
 
     </extensions>
 </idea-plugin>
