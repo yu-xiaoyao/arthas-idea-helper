@@ -7,8 +7,7 @@ import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings
 import com.github.yuxiaoyao.arthasideahelper.utils.ArthasUtils
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.application.ApplicationConfiguration
-import com.intellij.execution.configurations.RunProfile
-import com.intellij.execution.configurations.RunProfileState
+import com.intellij.execution.configurations.*
 import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.impl.DefaultJavaProgramRunner
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -21,9 +20,11 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
+import com.jetbrains.rd.framework.base.deepClonePolymorphic
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.concurrency.Promise
-import com.intellij.execution.configurations.CommandLineTokenizer
+import java.io.File
+
 
 /**
  * @author Kerry2 on 2025/08/07
@@ -53,75 +54,102 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
                 (profile is ApplicationConfiguration)
     }
 
-    @Suppress("UnstableApiUsage")
     override fun doExecuteAsync(
         state: TargetEnvironmentAwareRunProfileState,
         env: ExecutionEnvironment
     ): Promise<RunContentDescriptor?> {
-        setupArthasEnvironment(env)
-        return super.doExecuteAsync(state, env)
+        logger.info("doExecuteAsync. ${state}")
+
+        if (state is JavaCommandLineState) {
+            val wrappedState: RunProfileState = object : JavaCommandLineState(env) {
+                @Throws(ExecutionException::class)
+                override fun createJavaParameters(): JavaParameters {
+                    val params: JavaParameters = state.javaParameters()
+                    params.getVMParametersList().add("-Dmy.custom.option=value")
+                    return params
+                }
+            }
+        }
+
+        val newEnv = setupArthasEnvironment(env)
+        return super.doExecuteAsync(state, newEnv)
     }
 
     @Throws(ExecutionException::class)
     override fun doExecute(state: RunProfileState, env: ExecutionEnvironment): RunContentDescriptor? {
-        setupArthasEnvironment(env)
-        return super.doExecute(state, env)
+        val newEnv = setupArthasEnvironment(env)
+        return super.doExecute(state, newEnv)
     }
 
     /**
      * Setup Arthas environment before execution
      */
-    private fun setupArthasEnvironment(environment: ExecutionEnvironment) {
+    private fun setupArthasEnvironment(environment: ExecutionEnvironment): ExecutionEnvironment {
         val project = environment.project
         when (val runProfile = environment.runProfile) {
             is ApplicationConfiguration -> {
-                this.setupArthasAgent(project, runProfile)
+                val arthasAgentPath = ArthasHelperSettings.getInstance().arthasAgentPath
 
-//                val pluginPath = com.intellij.ide.plugins.PluginManagerCore.getPlugin(pluginId)?.pluginPath
-//                val arthasEnabled =
-//                    runProfile.getUserData(ArthasUserDataKeys.ARTHAS_ENABLED) ?: ArthasUtil.ARTHAS_ENABLED
-//                logger.info("Arthas enabled: $arthasEnabled - $pluginPath")
-//                if (arthasEnabled) {
-//                    validateArthasAgent(project, ArthasUtil.DEFAULT_ARTHAS_AGENT_PATH)
-//                }
+                if (arthasAgentPath.isBlank()) {
+                    openSettings(project)
+                    return environment
+                }
+
+                val file = File(arthasAgentPath)
+                if (!file.exists() || !file.extension.endsWith("jar", ignoreCase = true)) {
+                    openSettings(project)
+                    return environment
+                }
+
+                logger.info("runProfile.vmParameters = ${runProfile.vmParameters}")
+
+                val newVmParams = buildVmParameters(runProfile.vmParameters, arthasAgentPath)
+
+//                logger.info("newVmParams = $newVmParams")
+
+                if (newVmParams != null) {
+                    val deepClonePolymorphic = environment.deepClonePolymorphic()
+                    (deepClonePolymorphic.runProfile as ApplicationConfiguration).vmParameters = newVmParams
+                    return deepClonePolymorphic
+                }
             }
         }
-    }
-
-    private fun setupArthasAgent(project: Project, runProfile: ApplicationConfiguration) {
-        val arthasAgentPath = ArthasHelperSettings.getInstance().arthasAgentPath
-
-        if (arthasAgentPath.isBlank()) {
-            openSettings(project)
-            return
-        }
-        val file = java.io.File(arthasAgentPath)
-        if (!file.exists() || !file.extension.endsWith("jar", ignoreCase = true)) {
-            openSettings(project)
-            return
-        }
-        addArthasAgentToConfiguration(runProfile, arthasAgentPath)
+        return environment
     }
 
 
-    /**
-     * Add Arthas agent to regular ApplicationConfiguration
-     */
-    private fun addArthasAgentToConfiguration(configuration: ApplicationConfiguration, agentPath: String) {
-        // Use ArthasUtil to add agent parameters
-        val currentVmParams = configuration.vmParameters
-
-
+    private fun buildVmParameters(vmParams: String?, agentPath: String): String? {
+        val currentVmParams = vmParams ?: ""
+        val args = mutableSetOf<String>()
         val tokenizer = CommandLineTokenizer(currentVmParams)
+
+        var addAgent = true
         while (tokenizer.hasMoreTokens()) {
-            logger.info("TOKEN = ${tokenizer.nextToken()}")
+            val token = tokenizer.nextToken()
+            if (token.startsWith("-javaagent:")) {
+                val currentAgentPath = token.substring("-javaagent:".length)
+                logger.info("configuration.vmParameters. currentAgentPath = $currentAgentPath")
+                val filename = getFileNameUsingSubstringAfterLast(currentAgentPath)
+                if (ArthasUtils.AGENT_JAR == filename) {
+                    if (File(currentAgentPath).exists()) {
+                        addAgent = false
+                        args.add(currentAgentPath)
+                    }
+                }
+            } else {
+                args.add(token)
+            }
         }
 
-
-        val newVmParams = ArthasUtils.addArthasAgentToVmParameters(currentVmParams, agentPath)
-        configuration.vmParameters = newVmParams
+        if (addAgent) {
+            return ArthasUtils.addArthasAgentToVmParameters(args.joinToString(" "), agentPath)
+        }
+        return null
     }
 
+    fun getFileNameUsingSubstringAfterLast(path: String): String {
+        return path.substringAfterLast('\\').substringAfterLast('/')
+    }
 
     private fun openSettings(project: Project) {
         val result = Messages.showYesNoDialog(
@@ -135,9 +163,12 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
                 project,
                 ArthasHelperSearchableConfigurable::class.java
             )
-        } else {
+            //TODO show Notication
+            logger.info("Arthas agent not found, open settings: " + ArthasHelperSettings.getInstance().arthasAgentPath)
+        } /*else {
+            // skip
             throw ExecutionException("Arthas agent not found")
-        }
+        }*/
 
     }
 
