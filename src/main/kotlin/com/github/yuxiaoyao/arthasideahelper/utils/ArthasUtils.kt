@@ -12,6 +12,7 @@ import java.io.File
 object ArthasUtils {
 
     const val AGENT_JAR = "arthas-agent.jar"
+    const val JAVAAGENT_START = "-javaagent:"
 
     /**
      * 获取 Arthas Agent 路径

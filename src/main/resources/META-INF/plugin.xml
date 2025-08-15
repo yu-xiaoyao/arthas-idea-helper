@@ -22,7 +22,14 @@
                 serviceImplementation="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings"/>
 
         <applicationConfigurable
-                instance="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSearchableConfigurable"
+                key="pluginName"
+                instance="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperConfigurable"
+        />
+
+        <projectConfigurable
+                key="arthas.projectSettings"
+                instance="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperProjectConfigurable"
+                parentId="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperConfigurable"
         />
 
         <programRunner implementation="com.github.yuxiaoyao.arthasideahelper.runner.ArthasProgramRunner"/>

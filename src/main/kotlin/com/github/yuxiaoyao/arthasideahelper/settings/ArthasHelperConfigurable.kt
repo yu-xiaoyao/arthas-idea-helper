@@ -12,7 +12,7 @@ import com.intellij.ui.dsl.builder.panel
 /**
  * @author kerryzhang on 2025/08/14
  */
-class ArthasHelperSearchableConfigurable : BoundConfigurable(MyBundle.message("pluginName")) {
+class ArthasHelperConfigurable : BoundConfigurable(MyBundle.message("pluginName")) {
 
     private val settings = ArthasHelperSettings.getInstance()
 
