@@ -1,18 +1,22 @@
 package com.github.yuxiaoyao.arthasideahelper.settings
 
 import com.github.yuxiaoyao.arthasideahelper.MyBundle
+import com.github.yuxiaoyao.arthasideahelper.utils.ArthasUtils
+import com.github.yuxiaoyao.arthasideahelper.utils.NetworkUtil
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.BoundConfigurable
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.*
-import javax.swing.JCheckBox
-
 
 /**
  * @author kerryzhang on 2025/08/15
  */
 
-class ArthasHelperProjectConfigurable(private val project: Project) :
+class ArthasHelperProjectConfigurable(project: Project) :
     BoundConfigurable(MyBundle.message("arthas.projectSettings")) {
 
     private val settings = ArthasHelperProjectSettings.getInstance(project)
@@ -24,10 +28,13 @@ class ArthasHelperProjectConfigurable(private val project: Project) :
                 val telnetPortField = intTextField(IntRange(-1, 65535))
                     .bindIntText(settings::telnetPort)
                 button(MyBundle.message("arthas.disablePort")) {
-                    settings.telnetPort = -1
+//                    settings.telnetPort = -1
+                    telnetPortField.text("-1")
                 }
                 button(MyBundle.message("arthas.randomPort")) {
-                    settings.telnetPort = 0
+//                    settings.telnetPort = 0
+//                    telnetPortField.text("0")
+                    generateDataAsync(telnetPortField)
                 }
             }
 
@@ -35,10 +42,13 @@ class ArthasHelperProjectConfigurable(private val project: Project) :
                 val httpPortField = intTextField(IntRange(-1, 65535))
                     .bindIntText(settings::httpPort)
                 button(MyBundle.message("arthas.disablePort")) {
-                    settings.httpPort = -1
+//                    settings.httpPort = -1
+                    httpPortField.text("-1")
                 }
                 button(MyBundle.message("arthas.randomPort")) {
-                    settings.httpPort = 0
+//                    settings.httpPort = 0
+//                    httpPortField.text("0")
+                    generateDataAsync(httpPortField)
                 }
             }
 
@@ -47,10 +57,12 @@ class ArthasHelperProjectConfigurable(private val project: Project) :
                     .bindText(settings::ip)
                     .columns(COLUMNS_SHORT)
                 button(MyBundle.message("arthas.ipLocal")) {
-                    settings.ip = "127.0.0.1"
+//                    settings.ip = "127.0.0.1"
+                    ipTf.text("127.0.0.1")
                 }
                 button(MyBundle.message("arthas.ipAny")) {
-                    settings.ip = "0.0.0.0"
+//                    settings.ip = "0.0.0.0"
+                    ipTf.text("0.0.0.0")
                 }
             }
 
@@ -60,44 +72,54 @@ class ArthasHelperProjectConfigurable(private val project: Project) :
                     .comment(MyBundle.message("arthas.sessionTimeoutComment"))
 
                 button(MyBundle.message("arthas.sessionTimeoutDefault")) {
-//                    sessionTimeout.component.text = "1800"
-                    settings.sessionTimeout = 18002
+                    sessionTimeout.component.text = "${ArthasUtils.DEFAULT_SESSION_TIMEOUT}"
                 }
             }
 
             separator()
 
-            lateinit var enableAdvancedFieldsCheckBox: Cell<JCheckBox>
+            lateinit var enableAdvancedFieldsCheckBox: Cell<JBCheckBox>
 
             row {
-                enableAdvancedFieldsCheckBox = checkBox("Enable Advanced Fields")
+                enableAdvancedFieldsCheckBox = checkBox(MyBundle.message("arthas.tunnelEnableConfig"))
                     .bindSelected(settings::tunnelEnable)
-                    .comment("Enable/disable App Name, Tunnel Server, and Agent ID fields")
             }
 
-            row("App Name:") {
+            row(MyBundle.message("arthas.tunnelAppName") + ":") {
                 textField()
                     .bindText(settings::appName)
-                    .comment("Application name for Arthas")
                     .columns(COLUMNS_MEDIUM)
                     .enabledIf(enableAdvancedFieldsCheckBox.selected)
             }
 
-            row("Tunnel Server:") {
-                textField()
+            row(MyBundle.message("arthas.tunnelServer") + ":") {
+                val tunnelServer = textField()
                     .bindText(settings::tunnelServer)
-                    .comment("WebSocket tunnel server URL")
-                    .columns(COLUMNS_LARGE)
+                    .columns(COLUMNS_MEDIUM)
                     .enabledIf(enableAdvancedFieldsCheckBox.selected)
+
+                button(MyBundle.message("arthas.tunnelServerDefault")) {
+                    tunnelServer.text(ArthasUtils.DEFAULT_TUNNEL_SERVER)
+                }.enabledIf(enableAdvancedFieldsCheckBox.selected)
             }
 
-            row("Agent ID:") {
+            row(MyBundle.message("arthas.tunnelAgentId") + ":") {
                 textField()
                     .bindText(settings::agentId)
-                    .comment("Unique agent identifier")
                     .columns(COLUMNS_MEDIUM)
                     .enabledIf(enableAdvancedFieldsCheckBox.selected)
             }
         }
     }
+
+    private fun generateDataAsync(textField: Cell<JBTextField>) {
+        // 用 IntelliJ 的后台任务框架，避免阻塞 UI
+        ProgressManager.getInstance().run {
+            val port = NetworkUtil.findAvailablePort()
+            ApplicationManager.getApplication().invokeLater {
+                textField.text("$port")
+            }
+        }
+    }
+
 }

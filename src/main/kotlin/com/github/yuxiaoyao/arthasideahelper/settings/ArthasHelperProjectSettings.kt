@@ -1,5 +1,6 @@
 package com.github.yuxiaoyao.arthasideahelper.settings
 
+import com.github.yuxiaoyao.arthasideahelper.utils.ArthasUtils
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
@@ -14,49 +15,46 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 
 @State(
     name = "ArthasHelperProjectSettings",
-    storages = [Storage("arthas-helper-project.xml")]
+    storages = [Storage("ArthasHelperProjectSettings.xml")]
 )
 @Service(Service.Level.PROJECT)
-class ArthasHelperProjectSettings(private val project: Project) :
-    PersistentStateComponent<ArthasHelperProjectSettings> {
+class ArthasHelperProjectSettings : PersistentStateComponent<ArthasHelperProjectSettings> {
 
-    var telnetPort: Int = 3658
-    var httpPort: Int = 8563
+    var telnetPort: Int = 0
+    var httpPort: Int = 0
     var ip: String = "127.0.0.1"
-    var sessionTimeout: Int = 1800
+    var sessionTimeout: Int = ArthasUtils.DEFAULT_SESSION_TIMEOUT
 
     var tunnelEnable: Boolean = false
 
     var appName: String = ""
-    var tunnelServer: String = "ws://127.0.0.1:7777/ws"
+    var tunnelServer: String = ArthasUtils.DEFAULT_TUNNEL_SERVER
     var agentId: String = ""
 
-    private var defaultsInitialized: Boolean = false
-
-    init {
-        initializeDefaults()
-    }
-
-    private fun initializeDefaults() {
-        if (!defaultsInitialized && appName.isEmpty() && agentId.isEmpty()) {
-            val projectName = project.name
-            appName = projectName
-            agentId = "id-$projectName"
-            defaultsInitialized = true
-        }
-    }
 
     override fun getState(): ArthasHelperProjectSettings = this
 
     override fun loadState(state: ArthasHelperProjectSettings) {
         XmlSerializerUtil.copyBean(state, this)
-        // After loading state, ensure defaults are set if values are still empty
-        initializeDefaults()
     }
 
     companion object {
+
+        @JvmStatic
         fun getInstance(project: Project): ArthasHelperProjectSettings {
-            return project.getService(ArthasHelperProjectSettings::class.java)
+            val settings = project.getService(ArthasHelperProjectSettings::class.java)
+            initializeDefaults(project, settings)
+            return settings
+        }
+
+        @JvmStatic
+        private fun initializeDefaults(project: Project, settings: ArthasHelperProjectSettings) {
+            if (settings.appName.isEmpty()) {
+                settings.appName = project.name
+            }
+            if (settings.agentId.isEmpty()) {
+                settings.agentId = "agentId-${project.name}"
+            }
         }
     }
 }

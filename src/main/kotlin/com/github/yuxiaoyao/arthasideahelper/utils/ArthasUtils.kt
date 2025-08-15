@@ -13,6 +13,8 @@ object ArthasUtils {
 
     const val AGENT_JAR = "arthas-agent.jar"
     const val JAVAAGENT_START = "-javaagent:"
+    const val DEFAULT_SESSION_TIMEOUT = 1800
+    const val DEFAULT_TUNNEL_SERVER = "ws://127.0.0.1:7777/ws"
 
     /**
      * 获取 Arthas Agent 路径
