@@ -18,7 +18,9 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 @Service
 class ArthasHelperSettings : PersistentStateComponent<ArthasHelperSettings> {
 
+    var arthasHome: String = ""
     var arthasAgentPath: String = ""
+    var arthasCorePath: String = ""
 
     override fun getState(): ArthasHelperSettings = this
 

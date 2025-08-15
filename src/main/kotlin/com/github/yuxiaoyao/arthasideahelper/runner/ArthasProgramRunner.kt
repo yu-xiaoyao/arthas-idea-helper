@@ -64,10 +64,14 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
         if (state is JavaCommandLineState) {
             val arthasAgentPath = getArthasAgentPath(env.project)
             if (arthasAgentPath.isNotEmpty()) {
+                val agentParms = ArthasUtils.buildProjectAgentParams(env.project)
+
+                logger.info("javaagent parameters: $agentParms")
+
                 val arthasAgent = if (arthasAgentPath.contains(" ")) {
-                    """${ArthasUtils.JAVAAGENT_START}"$arthasAgentPath""""
+                    """${ArthasUtils.JAVAAGENT_START}"$arthasAgentPath"=$agentParms"""
                 } else {
-                    "${ArthasUtils.JAVAAGENT_START}$arthasAgentPath"
+                    "${ArthasUtils.JAVAAGENT_START}$arthasAgentPath=$agentParms"
                 }
                 val javaParameters = state.javaParameters
                 // 以下代码想要将原来已有 arthas-agent.jar 配置替换...
@@ -141,6 +145,7 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
         }
         return arthasAgentPath
     }
+
 
     /**
      * 这种方式会修改 Configuration 中的配置

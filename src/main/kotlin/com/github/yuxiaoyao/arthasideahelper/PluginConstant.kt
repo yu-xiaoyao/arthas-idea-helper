@@ -10,3 +10,5 @@ import com.intellij.openapi.extensions.PluginId
 
 const val PLUGIN_ID = "com.github.yuxiaoyao.arthasideahelper"
 val pluginId = PluginId.getId(PLUGIN_ID)
+
+const val NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.notification"

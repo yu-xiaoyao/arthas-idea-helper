@@ -12,12 +12,27 @@
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
+    <applicationListeners>
+        <!-- 程序执行监听 -->
+        <listener class="com.github.yuxiaoyao.arthasideahelper.executor.ArthasHelperExecutionListener"
+                  topic="com.intellij.execution.ExecutionListener"/>
+    </applicationListeners>
+
     <extensions defaultExtensionNs="com.intellij">
 
         <!--
                 <runConfigurationExtension
                         implementation="com.github.yuxiaoyao.arthasideaplugin.runconfig.ArthasRunConfigurationExtension"/>
         -->
+
+        <!-- 通知 -->
+        <notificationGroup displayType="BALLOON"
+                           id="com.github.yuxiaoyao.arthasideahelper.notification"
+                           isLogByDefault="false"
+                           toolWindowId="Event Log" bundle="messages.MyBundle"
+                           key="pluginId"/>
+
+
         <applicationService
                 serviceImplementation="com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings"/>
 

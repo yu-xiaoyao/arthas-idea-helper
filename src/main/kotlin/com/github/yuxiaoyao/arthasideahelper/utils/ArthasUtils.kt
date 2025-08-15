@@ -1,5 +1,6 @@
 package com.github.yuxiaoyao.arthasideahelper.utils
 
+import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperProjectSettings
 import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -11,10 +12,26 @@ import java.io.File
  */
 object ArthasUtils {
 
+    const val LOCAL_IP = "127.0.0.1"
+
     const val AGENT_JAR = "arthas-agent.jar"
+    const val CORE_JAR = "arthas-core.jar"
     const val JAVAAGENT_START = "-javaagent:"
     const val DEFAULT_SESSION_TIMEOUT = 1800
     const val DEFAULT_TUNNEL_SERVER = "ws://127.0.0.1:7777/ws"
+
+    const val ARTHAS_KEY_HTTP_PORT = "httpPort"
+    const val ARTHAS_KEY_TELNET_PORT = "telnetPort"
+    const val ARTHAS_KEY_SESSION_TIMEOUT = "sessionTimeout"
+
+    const val ARTHAS_KEY_APP_NAME = "appName"
+    const val ARTHAS_KEY_PROCESS_ID = "processId"
+    const val ARTHAS_KEY_LOG_FILE = "logFile"
+    const val ARTHAS_KEY_LOG_LEVEL = "logLevel"
+    const val ARTHAS_KEY_CORE_THREAD_COUNT = "coreThreadCount"
+    const val ARTHAS_KEY_QUEUE_CAPACITY = "queueCapacity"
+    const val ARTHAS_KEY_BATCH_SIZE = "batchSize"
+    const val ARTHAS_KEY_BATCH_INTERVAL = "batchInterval"
 
     /**
      * 获取 Arthas Agent 路径
@@ -123,4 +140,46 @@ object ArthasUtils {
         return "arthas-${System.currentTimeMillis()}"
     }
 
+
+    fun buildProjectAgentParams(project: Project): String {
+        val args = mutableListOf<String>()
+        val projectSettings = ArthasHelperProjectSettings.getInstance(project)
+
+
+        if (projectSettings.httpPort == -1) {
+            args.add("${ARTHAS_KEY_HTTP_PORT}=${projectSettings.httpPort}")
+        } else if (projectSettings.httpPort == 0) {
+            val findAvailablePort = NetworkUtil.findAvailablePort()
+            projectSettings.httpPort = findAvailablePort
+            args.add("${ARTHAS_KEY_HTTP_PORT}=$findAvailablePort")
+        }
+
+        if (projectSettings.telnetPort == -1) {
+            args.add("${ARTHAS_KEY_TELNET_PORT}=${projectSettings.telnetPort}")
+        } else if (projectSettings.telnetPort == 0) {
+            val findAvailablePort = NetworkUtil.findAvailablePort()
+            projectSettings.telnetPort = findAvailablePort
+            args.add("${ARTHAS_KEY_TELNET_PORT}=$findAvailablePort")
+        }
+
+        if (projectSettings.ip != LOCAL_IP) {
+            args.add("ip=${projectSettings.ip}")
+        }
+
+        if (projectSettings.sessionTimeout != DEFAULT_SESSION_TIMEOUT) {
+            args.add("${ARTHAS_KEY_SESSION_TIMEOUT}=${projectSettings.sessionTimeout}")
+        }
+
+        val paramLine = args.joinToString(";")
+
+
+        val settings = ArthasHelperSettings.getInstance()
+        if (settings.arthasCorePath.isNotBlank()) {
+            if (settings.arthasCorePath.contains(" ")) {
+                return """"${settings.arthasCorePath}";$paramLine"""
+            }
+            return "${settings.arthasCorePath};$paramLine"
+        }
+        return ";$paramLine"
+    }
 }
