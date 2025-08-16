@@ -13,7 +13,8 @@ import java.io.File
 object ArthasUtils {
 
     const val LOCAL_IP = "127.0.0.1"
-
+    const val DEFAULT_HTTP_PORT = 8563
+    const val DEFAULT_TELNET_PORT = 3658
     const val AGENT_JAR = "arthas-agent.jar"
     const val CORE_JAR = "arthas-core.jar"
     const val JAVAAGENT_START = "-javaagent:"
@@ -23,15 +24,9 @@ object ArthasUtils {
     const val ARTHAS_KEY_HTTP_PORT = "httpPort"
     const val ARTHAS_KEY_TELNET_PORT = "telnetPort"
     const val ARTHAS_KEY_SESSION_TIMEOUT = "sessionTimeout"
-
+    const val ARTHAS_KEY_TUNNEL_SERVER = "tunnelServer"
     const val ARTHAS_KEY_APP_NAME = "appName"
-    const val ARTHAS_KEY_PROCESS_ID = "processId"
-    const val ARTHAS_KEY_LOG_FILE = "logFile"
-    const val ARTHAS_KEY_LOG_LEVEL = "logLevel"
-    const val ARTHAS_KEY_CORE_THREAD_COUNT = "coreThreadCount"
-    const val ARTHAS_KEY_QUEUE_CAPACITY = "queueCapacity"
-    const val ARTHAS_KEY_BATCH_SIZE = "batchSize"
-    const val ARTHAS_KEY_BATCH_INTERVAL = "batchInterval"
+    const val ARTHAS_KEY_AGENT_ID = "agentId"
 
     /**
      * 获取 Arthas Agent 路径
@@ -141,26 +136,46 @@ object ArthasUtils {
     }
 
 
+    fun isProjectHasArthasAgent(settings: ArthasHelperProjectSettings): Boolean {
+        if (settings.httpPort == -1 && settings.telnetPort == -1) {
+            if (!settings.tunnelEnable) {
+                return false
+            }
+
+            // tunnelEnable = true, 但是 url 为空
+            if (settings.tunnelServer.isBlank()) {
+                return false
+            }
+        }
+        return true
+    }
+
+
     fun buildProjectAgentParams(project: Project): String {
-        val args = mutableListOf<String>()
         val projectSettings = ArthasHelperProjectSettings.getInstance(project)
 
+        if (!isProjectHasArthasAgent(projectSettings)) {
+            return ""
+        }
+        val args = mutableListOf<String>()
 
-        if (projectSettings.httpPort == -1) {
-            args.add("${ARTHAS_KEY_HTTP_PORT}=${projectSettings.httpPort}")
-        } else if (projectSettings.httpPort == 0) {
-            val findAvailablePort = NetworkUtil.findAvailablePort()
+        val httpPort = if (projectSettings.httpPort == 0) {
+            val findAvailablePort = NetworkUtil.getAvailableHttPort()
             projectSettings.httpPort = findAvailablePort
-            args.add("${ARTHAS_KEY_HTTP_PORT}=$findAvailablePort")
+            findAvailablePort
+        } else {
+            projectSettings.httpPort
         }
+        args.add("${ARTHAS_KEY_HTTP_PORT}=$httpPort")
 
-        if (projectSettings.telnetPort == -1) {
-            args.add("${ARTHAS_KEY_TELNET_PORT}=${projectSettings.telnetPort}")
-        } else if (projectSettings.telnetPort == 0) {
-            val findAvailablePort = NetworkUtil.findAvailablePort()
+        val telnetPort = if (projectSettings.telnetPort == 0) {
+            val findAvailablePort = NetworkUtil.getAvailableTelnetPort()
             projectSettings.telnetPort = findAvailablePort
-            args.add("${ARTHAS_KEY_TELNET_PORT}=$findAvailablePort")
+            findAvailablePort
+        } else {
+            projectSettings.telnetPort
         }
+        args.add("${ARTHAS_KEY_TELNET_PORT}=$telnetPort")
 
         if (projectSettings.ip != LOCAL_IP) {
             args.add("ip=${projectSettings.ip}")
@@ -170,14 +185,19 @@ object ArthasUtils {
             args.add("${ARTHAS_KEY_SESSION_TIMEOUT}=${projectSettings.sessionTimeout}")
         }
 
+        if (projectSettings.tunnelEnable && projectSettings.tunnelServer.isNotBlank()) {
+            args.add("${ARTHAS_KEY_TUNNEL_SERVER}=${projectSettings.tunnelServer}")
+            if (projectSettings.appName.isNotBlank()) {
+                args.add("${ARTHAS_KEY_APP_NAME}=${projectSettings.appName}")
+            }
+            if (projectSettings.agentId.isNotBlank()) {
+                args.add("${ARTHAS_KEY_AGENT_ID}=${projectSettings.agentId}")
+            }
+        }
+
         val paramLine = args.joinToString(";")
-
-
         val settings = ArthasHelperSettings.getInstance()
         if (settings.arthasCorePath.isNotBlank()) {
-            if (settings.arthasCorePath.contains(" ")) {
-                return """"${settings.arthasCorePath}";$paramLine"""
-            }
             return "${settings.arthasCorePath};$paramLine"
         }
         return ";$paramLine"

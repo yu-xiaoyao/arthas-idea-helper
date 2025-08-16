@@ -8,6 +8,7 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.*
@@ -34,7 +35,7 @@ class ArthasHelperProjectConfigurable(project: Project) :
                 button(MyBundle.message("arthas.randomPort")) {
 //                    settings.telnetPort = 0
 //                    telnetPortField.text("0")
-                    generateDataAsync(telnetPortField)
+                    generateDataAsync(telnetPortField, NetworkUtil::getAvailableTelnetPort)
                 }
             }
 
@@ -48,7 +49,7 @@ class ArthasHelperProjectConfigurable(project: Project) :
                 button(MyBundle.message("arthas.randomPort")) {
 //                    settings.httpPort = 0
 //                    httpPortField.text("0")
-                    generateDataAsync(httpPortField)
+                    generateDataAsync(httpPortField, NetworkUtil::getAvailableHttPort)
                 }
             }
 
@@ -96,6 +97,9 @@ class ArthasHelperProjectConfigurable(project: Project) :
                 val tunnelServer = textField()
                     .bindText(settings::tunnelServer)
                     .columns(COLUMNS_MEDIUM)
+                    .validationOnInput {
+                        validateTunnelServer(it.text)
+                    }
                     .enabledIf(enableAdvancedFieldsCheckBox.selected)
 
                 button(MyBundle.message("arthas.tunnelServerDefault")) {
@@ -112,14 +116,24 @@ class ArthasHelperProjectConfigurable(project: Project) :
         }
     }
 
-    private fun generateDataAsync(textField: Cell<JBTextField>) {
+    private fun generateDataAsync(textField: Cell<JBTextField>, provider: () -> Int) {
         // 用 IntelliJ 的后台任务框架，避免阻塞 UI
         ProgressManager.getInstance().run {
-            val port = NetworkUtil.findAvailablePort()
+            val port = provider.invoke()
             ApplicationManager.getApplication().invokeLater {
                 textField.text("$port")
             }
         }
+    }
+
+    private fun validateTunnelServer(url: String): ValidationInfo? {
+        if (url.isBlank()) {
+            return null
+        }
+        if (url.startsWith("ws://") || url.startsWith("ws://")) {
+            return null
+        }
+        return ValidationInfo(MyBundle.message("url.invalid"))
     }
 
 }

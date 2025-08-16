@@ -6,8 +6,14 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
+
+    <!--    <depends>intellij.java.terminal</depends>-->
+    <!--    <depends>com.intellij.terminal</depends>-->
+
+
     <!--
-        <depends optional="true">com.intellij.spring.boot</depends>
+            <depends optional="true">com.intellij.spring.boot</depends>
     -->
 
     <resource-bundle>messages.MyBundle</resource-bundle>
@@ -26,11 +32,11 @@
         -->
 
         <!-- 通知 -->
-        <notificationGroup displayType="BALLOON"
+        <notificationGroup displayType="STICKY_BALLOON"
                            id="com.github.yuxiaoyao.arthasideahelper.notification"
-                           isLogByDefault="false"
+                           isLogByDefault="true"
                            toolWindowId="Event Log" bundle="messages.MyBundle"
-                           key="pluginId"/>
+                           key="notificationGroupId"/>
 
 
         <applicationService

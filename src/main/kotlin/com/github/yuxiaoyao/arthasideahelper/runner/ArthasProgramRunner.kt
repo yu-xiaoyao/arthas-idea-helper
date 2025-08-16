@@ -57,6 +57,11 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
                 (profile is ApplicationConfiguration)
     }
 
+    override fun execute(environment: ExecutionEnvironment) {
+        super.execute(environment)
+
+    }
+
     override fun doExecuteAsync(
         state: TargetEnvironmentAwareRunProfileState,
         env: ExecutionEnvironment
