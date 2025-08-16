@@ -37,7 +37,7 @@ object ArthasRunningNotification {
         val httpUrl = "http://${ArthasUtils.LOCAL_IP}:${projectSettings.httpPort}"
         val telnetCommand = "telnet ${ArthasUtils.LOCAL_IP} ${projectSettings.telnetPort}"
 
-        val content = "Arthas Helper 已启动"
+        val content = "http: $httpUrl. \n\n telnet: $telnetCommand"
 
         val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup(PLUGIN_NOTIFICATION_ID)
 
@@ -47,7 +47,6 @@ object ArthasRunningNotification {
         if (projectSettings.telnetPort != -1) {
             notification.addAction(NotificationAction.createSimple(MyBundle.message("open.telnetTerminal")) {
                 ArthasTerminalUtils.openTerminalAndRunCommand(project, telnetCommand)
-                // 点击后关闭通知
                 notification.expire()
                 lastNotification = null
             })
