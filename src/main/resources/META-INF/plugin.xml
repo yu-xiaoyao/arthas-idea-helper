@@ -24,6 +24,12 @@
                   topic="com.intellij.execution.ExecutionListener"/>
     </applicationListeners>
 
+    <actions>
+        <action class="com.github.yuxiaoyao.arthasideahelper.action.ArthasAttachAction" id="ArthasAttachAction">
+            <add-to-group group-id="RunMenu" anchor="last"/>
+        </action>
+    </actions>
+
     <extensions defaultExtensionNs="com.intellij">
 
         <!--
