@@ -2,7 +2,11 @@ package com.github.yuxiaoyao.arthasideahelper.utils
 
 
 import com.intellij.openapi.project.Project
+import com.intellij.terminal.TerminalUtils
+import com.jediterm.terminal.TerminalStarter
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager
+import org.jetbrains.plugins.terminal.TerminalUtil
+import org.jetbrains.plugins.terminal.runner.LocalTerminalStartCommandBuilder
 
 
 /**
@@ -15,6 +19,15 @@ object ArthasTerminalUtils {
         val toolWindowManager = TerminalToolWindowManager.getInstance(project)
         val createNewSession = toolWindowManager.createNewSession()
         createNewSession.sendCommandToExecute(command)
+
+
+        LocalTerminalStartCommandBuilder.convertShellPathToCommand("telnet.exe")
+
+
+//        TerminalUtils
+//        TerminalUtil.
+//        TerminalStarter()
+
 
 
 //        val terminalWindow = ToolWindowManager.getInstance(project).getToolWindow("Terminal")

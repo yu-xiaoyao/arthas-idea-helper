@@ -28,6 +28,15 @@
         <action class="com.github.yuxiaoyao.arthasideahelper.action.ArthasAttachAction" id="ArthasAttachAction">
             <add-to-group group-id="RunMenu" anchor="last"/>
         </action>
+
+
+        <action id="OpenTelnetConsole"
+                class="com.github.yuxiaoyao.arthasideahelper.action.OpenTelnetConsoleAction"
+                text="Open Telnet Console"
+                description="Open a Telnet session in ConsoleView">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
