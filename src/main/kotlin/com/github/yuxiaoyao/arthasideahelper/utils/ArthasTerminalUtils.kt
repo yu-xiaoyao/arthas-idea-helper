@@ -2,10 +2,7 @@ package com.github.yuxiaoyao.arthasideahelper.utils
 
 
 import com.intellij.openapi.project.Project
-import com.intellij.terminal.TerminalUtils
-import com.jediterm.terminal.TerminalStarter
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager
-import org.jetbrains.plugins.terminal.TerminalUtil
 import org.jetbrains.plugins.terminal.runner.LocalTerminalStartCommandBuilder
 
 
@@ -17,6 +14,10 @@ object ArthasTerminalUtils {
 
     fun openTerminalAndRunCommand(project: Project, command: String) {
         val toolWindowManager = TerminalToolWindowManager.getInstance(project)
+
+        val createNewSession1 = toolWindowManager.createNewSession()
+
+
         val createNewSession = toolWindowManager.createNewSession()
         createNewSession.sendCommandToExecute(command)
 
@@ -27,7 +28,6 @@ object ArthasTerminalUtils {
 //        TerminalUtils
 //        TerminalUtil.
 //        TerminalStarter()
-
 
 
 //        val terminalWindow = ToolWindowManager.getInstance(project).getToolWindow("Terminal")

@@ -1,6 +1,7 @@
 package com.github.yuxiaoyao.arthasideahelper.action
 
 import com.github.yuxiaoyao.arthasideahelper.telnet.RemoteTelnetProcess
+import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetHolder
 import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetProcessHandler
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.openapi.actionSystem.AnAction
@@ -20,6 +21,11 @@ class OpenTelnetConsoleAction : AnAction("Open Telnet Console") {
         val project = e.project
         if (project == null) return
 
+        val processHandler = TelnetHolder.processHandler
+
+
+
+
         try {
             // 建立 Telnet 连接
             val telnetClient = TelnetClient()
@@ -28,20 +34,19 @@ class OpenTelnetConsoleAction : AnAction("Open Telnet Console") {
             val processHandler = TelnetProcessHandler(telnetProcess)
 
             // 创建 ConsoleView
-            val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole()
+            val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
             consoleView.attachToProcess(processHandler)
 
             // 放到 ToolWindow 里展示
-            var toolWindow = ToolWindowManager.getInstance(project)
-                .getToolWindow("TelnetConsole")
+            var toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TelnetConsole")
             if (toolWindow == null) {
                 toolWindow = ToolWindowManager.getInstance(project)
                     .registerToolWindow("TelnetConsole", {
 
                     })
-                val content = toolWindow.getContentManager().getFactory()
-                    .createContent(consoleView.getComponent(), "Telnet Session", false)
-                toolWindow.getContentManager().addContent(content)
+                val content = toolWindow.contentManager.factory
+                    .createContent(consoleView.component, "Telnet Session", false)
+                toolWindow.contentManager.addContent(content)
                 toolWindow.activate(null)
 
                 // 启动数据转发

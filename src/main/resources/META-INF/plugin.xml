@@ -37,6 +37,13 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
 
+        <action id="SendTelnetCommandAction"
+                class="com.github.yuxiaoyao.arthasideahelper.action.SendTelnetCommandAction"
+                text="Send Telnet Command"
+                description="Send Telnet Command">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
