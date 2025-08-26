@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets
 
 private val logger = Logger.getInstance(TelnetProcessHandler::class.java)
 
-class TelnetProcessHandler(process: RemoteTelnetProcess) :
+class TelnetProcessHandler(process: TelnetRemoteProcess) :
     BaseOSProcessHandler(process, "Telnet Session", StandardCharsets.UTF_8) {
 
     private val ansiEscapeDecoder = AnsiEscapeDecoder()

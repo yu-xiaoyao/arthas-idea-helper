@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets
  * @author kerryzhang on 2025/08/24
  */
 
-class RemoteTelnetProcess(
+class TelnetRemoteProcess(
       val telnetClient: TelnetClient
 ) : RemoteProcess() {
 

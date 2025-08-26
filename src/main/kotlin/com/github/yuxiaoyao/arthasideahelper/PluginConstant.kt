@@ -15,3 +15,6 @@ val pluginId = PluginId.getId(PLUGIN_ID)
  * 在 plugin.xml 中声明 <notificationGroup/>
  */
 const val PLUGIN_NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.notification"
+
+
+const val TELNET_CONSOLE_TOOL_WINDOW_ID = "TelnetConsole"

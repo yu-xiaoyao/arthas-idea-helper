@@ -1,7 +1,7 @@
 package com.github.yuxiaoyao.arthasideahelper.action
 
-import com.github.yuxiaoyao.arthasideahelper.telnet.RemoteTelnetProcess
 import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetProcessHandler
+import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetRemoteProcess
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -27,7 +27,7 @@ class SendTelnetCommandAction : AnAction("SendTelnetCommandAction") {
                 // 建立 Telnet 连接
                 val telnetClient = TelnetClient()
                 telnetClient.connect("127.0.0.1", 3658)
-                val telnetProcess = RemoteTelnetProcess(telnetClient)
+                val telnetProcess = TelnetRemoteProcess(telnetClient)
                 processHandler = TelnetProcessHandler(telnetProcess)
 
                 // 创建 ConsoleView
@@ -37,6 +37,10 @@ class SendTelnetCommandAction : AnAction("SendTelnetCommandAction") {
                 // 放到 ToolWindow 里展示
                 var toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TelnetConsole")
                 if (toolWindow == null) {
+
+                    // RegisterToolWindowTask.closable()
+
+
                     toolWindow = ToolWindowManager.getInstance(project)
                         .registerToolWindow("TelnetConsole", {
 

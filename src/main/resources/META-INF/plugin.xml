@@ -25,10 +25,15 @@
     </applicationListeners>
 
     <actions>
-        <action class="com.github.yuxiaoyao.arthasideahelper.action.ArthasAttachAction" id="ArthasAttachAction">
+
+        <action class="com.github.yuxiaoyao.arthasideahelper.action.AttachArthasAction" id="ArthasAttach">
             <add-to-group group-id="RunMenu" anchor="last"/>
         </action>
 
+        <group id="ArthasAttachMoreGroup" popup="true"
+               class="com.github.yuxiaoyao.arthasideahelper.actions.ArthasAttachMoreGroupActionGroup">
+            <add-to-group group-id="RunMenu" relative-to-action="ArthasAttach" anchor="after"/>
+        </group>
 
         <action id="OpenTelnetConsole"
                 class="com.github.yuxiaoyao.arthasideahelper.action.OpenTelnetConsoleAction"
@@ -36,6 +41,14 @@
                 description="Open a Telnet session in ConsoleView">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
+
+        <action id="OpenTelnetColoredConsole"
+                class="com.github.yuxiaoyao.arthasideahelper.action.TelnetColoredConsoleAction"
+                text="Open Telnet Colored Console"
+                description="Open a Telnet session in ConsoleView">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
 
         <action id="SendTelnetCommandAction"
                 class="com.github.yuxiaoyao.arthasideahelper.action.SendTelnetCommandAction"
@@ -47,6 +60,13 @@
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <!-- secondary="true"    -->
+        <toolWindow id="ArthasConsole"
+                    factoryClass="com.github.yuxiaoyao.arthasideahelper.ArthasConsoleToolWindowsFactory"
+                    anchor="bottom"
+                    canCloseContents="true"
+        />
 
         <!--
                 <runConfigurationExtension

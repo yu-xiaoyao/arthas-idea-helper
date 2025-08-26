@@ -1,11 +1,13 @@
 package com.github.yuxiaoyao.arthasideahelper.action
 
+import com.github.yuxiaoyao.arthasideahelper.TELNET_CONSOLE_TOOL_WINDOW_ID
+import com.github.yuxiaoyao.arthasideahelper.telnet.ColoredTelnetProcessHandler
 import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetRemoteProcess
-import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetHolder
-import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetProcessHandler
 import com.intellij.execution.filters.TextConsoleBuilderFactory
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.wm.ToolWindowAnchor
 import com.intellij.openapi.wm.ToolWindowManager
 import org.apache.commons.net.telnet.TelnetClient
 
@@ -14,36 +16,36 @@ import org.apache.commons.net.telnet.TelnetClient
  * @author kerryzhang on 2025/08/24
  */
 
-class OpenTelnetConsoleAction : AnAction("Open Telnet Console") {
+class TelnetColoredConsoleAction : AnAction("Open Telnet Colored Console") {
 
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project
         if (project == null) return
 
-        val processHandler = TelnetHolder.processHandler
-
-
-
+//        val cmd = GeneralCommandLine("telnet", "127.0.0.1", "3658");
 
         try {
             // 建立 Telnet 连接
             val telnetClient = TelnetClient()
             telnetClient.connect("127.0.0.1", 3658)
             val telnetProcess = TelnetRemoteProcess(telnetClient)
-            val processHandler = TelnetProcessHandler(telnetProcess)
+            val processHandler = ColoredTelnetProcessHandler(telnetProcess)
 
             // 创建 ConsoleView
             val consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
             consoleView.attachToProcess(processHandler)
 
+            // 动态添加
             // 放到 ToolWindow 里展示
-            var toolWindow = ToolWindowManager.getInstance(project).getToolWindow("TelnetConsole")
+            val toolWindowManager = ToolWindowManager.getInstance(project)
+            var toolWindow = toolWindowManager.getToolWindow(TELNET_CONSOLE_TOOL_WINDOW_ID)
             if (toolWindow == null) {
-                toolWindow = ToolWindowManager.getInstance(project)
-                    .registerToolWindow("TelnetConsole", {
+                toolWindow = toolWindowManager.registerToolWindow(TELNET_CONSOLE_TOOL_WINDOW_ID) {
+                    icon = AllIcons.Debugger.Console
+                }
+                toolWindow.setAnchor(ToolWindowAnchor.BOTTOM, null);
 
-                    })
                 val content = toolWindow.contentManager.factory
                     .createContent(consoleView.component, "Telnet Session", false)
                 toolWindow.contentManager.addContent(content)
