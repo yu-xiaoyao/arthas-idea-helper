@@ -17,4 +17,4 @@ val pluginId = PluginId.getId(PLUGIN_ID)
 const val PLUGIN_NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.notification"
 
 
-const val TELNET_CONSOLE_TOOL_WINDOW_ID = "TelnetConsole"
+const val ARTHAS_CONSOLE_TOOL_WINDOW_ID = "ArthasConsole"

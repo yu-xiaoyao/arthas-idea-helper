@@ -57,16 +57,22 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
 
+        <action id="ArthasTestAction"
+                class="com.github.yuxiaoyao.arthasideahelper.action.ArthasTestAction"
+                text="Test Arthas">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
 
         <!-- secondary="true"    -->
-        <toolWindow id="ArthasConsole"
+     <!--   <toolWindow id="ArthasConsole"
                     factoryClass="com.github.yuxiaoyao.arthasideahelper.ArthasConsoleToolWindowsFactory"
                     anchor="bottom"
                     canCloseContents="true"
-        />
+        />-->
 
         <!--
                 <runConfigurationExtension

@@ -1,18 +1,20 @@
 package com.github.yuxiaoyao.arthasideahelper.action
 
-import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetRemoteProcess
-import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetHolder
 import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetProcessHandler
+import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetRemoteProcess
+import com.github.yuxiaoyao.arthasideahelper.utils.TelnetUtils
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.wm.ToolWindowManager
-import org.apache.commons.net.telnet.TelnetClient
 
 
 /**
  * @author kerryzhang on 2025/08/24
  */
+
+private val logger = Logger.getInstance(OpenTelnetConsoleAction::class.java)
 
 class OpenTelnetConsoleAction : AnAction("Open Telnet Console") {
 
@@ -21,15 +23,13 @@ class OpenTelnetConsoleAction : AnAction("Open Telnet Console") {
         val project = e.project
         if (project == null) return
 
-        val processHandler = TelnetHolder.processHandler
 
-
-
+        val telnetClient = TelnetUtils.createTelnetClient("127.0.0.1", 36581)
+        if (telnetClient == null) {
+            return
+        }
 
         try {
-            // 建立 Telnet 连接
-            val telnetClient = TelnetClient()
-            telnetClient.connect("127.0.0.1", 3658)
             val telnetProcess = TelnetRemoteProcess(telnetClient)
             val processHandler = TelnetProcessHandler(telnetProcess)
 
@@ -53,7 +53,7 @@ class OpenTelnetConsoleAction : AnAction("Open Telnet Console") {
                 processHandler.startNotify()
             }
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            logger.error("Error opening Telnet console = ${ex.message}", ex)
         }
     }
 }

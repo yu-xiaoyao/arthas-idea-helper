@@ -9,6 +9,18 @@ import com.intellij.remote.ColoredRemoteProcessHandler
 class ArthasColoredRemoteProcessHandler(process: ArthasRemoteProcess) :
     ColoredRemoteProcessHandler<ArthasRemoteProcess>(process, "Arthas", Charsets.UTF_8) {
 
+
+//    override fun destroyProcessImpl() {
+//        process.destroy()
+//    }
+//
+//    override fun detachProcessImpl() {
+//        notifyProcessDetached()
+//    }
+//
+//    override fun detachIsDefault(): Boolean {
+//        return false
+//    }
 }
 
 

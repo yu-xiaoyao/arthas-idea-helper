@@ -1,6 +1,6 @@
 package com.github.yuxiaoyao.arthasideahelper.action
 
-import com.github.yuxiaoyao.arthasideahelper.TELNET_CONSOLE_TOOL_WINDOW_ID
+import com.github.yuxiaoyao.arthasideahelper.ARTHAS_CONSOLE_TOOL_WINDOW_ID
 import com.github.yuxiaoyao.arthasideahelper.telnet.ColoredTelnetProcessHandler
 import com.github.yuxiaoyao.arthasideahelper.telnet.TelnetRemoteProcess
 import com.intellij.execution.filters.TextConsoleBuilderFactory
@@ -39,9 +39,9 @@ class TelnetColoredConsoleAction : AnAction("Open Telnet Colored Console") {
             // 动态添加
             // 放到 ToolWindow 里展示
             val toolWindowManager = ToolWindowManager.getInstance(project)
-            var toolWindow = toolWindowManager.getToolWindow(TELNET_CONSOLE_TOOL_WINDOW_ID)
+            var toolWindow = toolWindowManager.getToolWindow(ARTHAS_CONSOLE_TOOL_WINDOW_ID)
             if (toolWindow == null) {
-                toolWindow = toolWindowManager.registerToolWindow(TELNET_CONSOLE_TOOL_WINDOW_ID) {
+                toolWindow = toolWindowManager.registerToolWindow(ARTHAS_CONSOLE_TOOL_WINDOW_ID) {
                     icon = AllIcons.Debugger.Console
                 }
                 toolWindow.setAnchor(ToolWindowAnchor.BOTTOM, null);
