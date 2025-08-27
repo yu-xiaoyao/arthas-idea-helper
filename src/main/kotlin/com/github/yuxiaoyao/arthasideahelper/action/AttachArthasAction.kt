@@ -14,6 +14,8 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 
 class AttachArthasAction : AnAction(MyBundle.message("attach.arthas.jvm"), null, AllIcons.Actions.Attach) {
     override fun actionPerformed(event: AnActionEvent) {
-        JvmProcessDialog.showAttachDialog(event.project)
+        if (event.project != null) {
+            JvmProcessDialog.showAttachDialog(event.project!!)
+        }
     }
 }

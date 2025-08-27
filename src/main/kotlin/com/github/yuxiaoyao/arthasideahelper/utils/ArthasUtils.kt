@@ -16,6 +16,7 @@ object ArthasUtils {
     const val DEFAULT_HTTP_PORT = 8563
     const val DEFAULT_TELNET_PORT = 3658
     const val AGENT_JAR = "arthas-agent.jar"
+    const val BOOT_JAR = "arthas-boot.jar"
     const val CORE_JAR = "arthas-core.jar"
     const val JAVAAGENT_START = "-javaagent:"
     const val DEFAULT_SESSION_TIMEOUT = 1800

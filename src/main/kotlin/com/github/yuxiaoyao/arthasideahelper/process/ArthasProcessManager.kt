@@ -1,6 +1,7 @@
 package com.github.yuxiaoyao.arthasideahelper.process
 
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessListener
 import com.intellij.openapi.diagnostic.Logger
 import fleet.util.hashSetMultiMap
@@ -14,7 +15,7 @@ private val logger = Logger.getInstance(ArthasProcessManager::class.java)
 
 object ArthasProcessManager {
 
-    private val processMap = hashSetMultiMap<String, ArthasColoredRemoteProcessHandler>()
+    private val processMap = hashSetMultiMap<String, ProcessHandler>()
 
     fun createProcessHandler(id: String, process: ArthasRemoteProcess): ArthasColoredRemoteProcessHandler {
         val processHandler = ArthasColoredRemoteProcessHandler(process)

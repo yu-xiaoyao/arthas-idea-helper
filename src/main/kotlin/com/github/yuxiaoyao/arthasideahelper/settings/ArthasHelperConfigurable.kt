@@ -22,6 +22,7 @@ class ArthasHelperConfigurable : BoundConfigurable(MyBundle.message("pluginName"
         return panel {
 
             lateinit var tfAgentJar: Cell<TextFieldWithBrowseButton>
+            lateinit var tfBootJar: Cell<TextFieldWithBrowseButton>
             lateinit var tfCoreJar: Cell<TextFieldWithBrowseButton>
 
             row(MyBundle.message("settings.arthasHome") + ":") {
@@ -35,12 +36,14 @@ class ArthasHelperConfigurable : BoundConfigurable(MyBundle.message("pluginName"
                     fileChosen = { vf ->
                         val jarFiles = VfsUtilCore.virtualToIoFile(vf)
                             .walk()
-                            .filter { it.isFile && (it.name == ArthasUtils.AGENT_JAR || it.name == ArthasUtils.CORE_JAR) }
+                            .filter { it.isFile && (it.name == ArthasUtils.AGENT_JAR || it.name == ArthasUtils.BOOT_JAR || it.name == ArthasUtils.CORE_JAR) }
                             .toList()
 
                         jarFiles.forEach { jar ->
                             if (jar.name == ArthasUtils.AGENT_JAR) {
                                 tfAgentJar.text(jar.path)
+                            } else if (jar.name == ArthasUtils.BOOT_JAR) {
+                                tfBootJar.text(jar.path)
                             } else if (jar.name == ArthasUtils.CORE_JAR) {
                                 tfCoreJar.text(jar.path)
                             }
@@ -77,6 +80,33 @@ class ArthasHelperConfigurable : BoundConfigurable(MyBundle.message("pluginName"
                 )
                     .bindText(settings::arthasAgentPath)
                     .comment(MyBundle.message("settings.arthasAgentPath.comment"))
+                    .align(AlignX.FILL)
+                    .validationOnInput {
+                        validateJarPath(it.text)
+                    }
+                    .validationOnApply {
+                        validateJarPath(it.text)
+                    }
+            }
+
+
+            row(MyBundle.message("settings.arthasBootPath") + ":") {
+
+                val bootJarFileChooser = FileChooserDescriptorFactory.createSingleFileDescriptor().apply {
+                    title = MyBundle.message("settings.arthasBootPath.chooser")
+                    description = MyBundle.message("settings.arthasBootPath.comment")
+                    withFileFilter { file ->
+                        file.extension.equals("jar", ignoreCase = true)
+                    }
+                }
+
+                tfBootJar = textFieldWithBrowseButton(
+                    bootJarFileChooser,
+                    null,
+                    fileChosen = { vf -> vf.path }
+                )
+                    .bindText(settings::arthasBootPath)
+                    .comment(MyBundle.message("settings.arthasBootPath.comment"))
                     .align(AlignX.FILL)
                     .validationOnInput {
                         validateJarPath(it.text)

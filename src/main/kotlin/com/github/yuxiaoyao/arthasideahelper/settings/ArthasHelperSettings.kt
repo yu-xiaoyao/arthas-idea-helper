@@ -20,6 +20,7 @@ class ArthasHelperSettings : PersistentStateComponent<ArthasHelperSettings> {
 
     var arthasHome: String = ""
     var arthasAgentPath: String = ""
+    var arthasBootPath: String = ""
     var arthasCorePath: String = ""
 
     override fun getState(): ArthasHelperSettings = this
@@ -29,6 +30,7 @@ class ArthasHelperSettings : PersistentStateComponent<ArthasHelperSettings> {
     }
 
     companion object {
+        @JvmStatic
         fun getInstance(): ArthasHelperSettings {
             return ApplicationManager.getApplication().getService(ArthasHelperSettings::class.java)
         }

@@ -1,8 +1,9 @@
 package com.github.yuxiaoyao.arthasideahelper.dialog
 
 import com.github.yuxiaoyao.arthasideahelper.MyBundle
+import com.github.yuxiaoyao.arthasideahelper.utils.ArthasTerminalUtils
+import com.github.yuxiaoyao.arthasideahelper.utils.JavaUtils
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.SearchTextField
@@ -34,7 +35,7 @@ object JvmProcessDialog {
 
     val columnNames = arrayOf("PID", "Process Name")
 
-    fun showAttachDialog(project: Project?) {
+    fun showAttachDialog(project: Project) {
         val descriptors = VirtualMachine.list()
         val data = descriptors.filter {
             it.displayName().isNotEmpty()
@@ -96,7 +97,7 @@ object JvmProcessDialog {
         table.addKeyListener(object : KeyAdapter() {
             override fun keyPressed(e: KeyEvent) {
                 if (e.keyCode == KeyEvent.VK_ENTER) {
-                    attachSelected(table, descriptors)
+                    attachSelected(project, table, descriptors)
                     popup.closeOk(null)
                 }
             }
@@ -106,7 +107,7 @@ object JvmProcessDialog {
         table.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
-                    attachSelected(table, descriptors)
+                    attachSelected(project, table, descriptors)
                     popup.closeOk(null)
                 }
             }
@@ -153,13 +154,23 @@ object JvmProcessDialog {
     }
 
     private fun attachSelected(
+        project: Project,
         table: JBTable,
         descriptors: MutableList<VirtualMachineDescriptor>
     ) {
-        //TODO
-        Messages.showInfoMessage(
-            "SELECTED",
-            "Attach to Process"
-        )
+
+        val selectedRow = table.selectedRow
+        if (selectedRow >= 0) {
+            val valueAt = table.model.getValueAt(selectedRow, 0)
+
+            val javaExecutable = JavaUtils.getJavaExecutable(project) ?: return
+            ArthasTerminalUtils.createBootConsole(project, javaExecutable, valueAt as String)
+
+//            Messages.showInfoMessage(
+//                "SELECTED",
+//                "Attach to Process = $valueAt"
+//            )
+
+        }
     }
 }
