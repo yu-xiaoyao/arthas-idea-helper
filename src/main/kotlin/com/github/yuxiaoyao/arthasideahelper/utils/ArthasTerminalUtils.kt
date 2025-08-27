@@ -22,6 +22,7 @@ object ArthasTerminalUtils {
     fun createBootConsole(project: Project, javaExecutable: String, pid: String) {
         val arthasBootPath = ArthasHelperSettings.getInstance().arthasBootPath
         if (arthasBootPath.isEmpty()) {
+            logger.warn("Cannot find arthas boot path")
             return
         }
         logger.info("createBootConsole javaExecutable = $javaExecutable. pid = $pid")

@@ -2,6 +2,7 @@ package com.github.yuxiaoyao.arthasideahelper.action
 
 import com.github.yuxiaoyao.arthasideahelper.process.ArthasProcessManager
 import com.github.yuxiaoyao.arthasideahelper.process.ArthasRemoteTelnetProcess
+import com.github.yuxiaoyao.arthasideahelper.utils.SocketUtils
 import com.github.yuxiaoyao.arthasideahelper.utils.TelnetUtils
 import com.github.yuxiaoyao.arthasideahelper.utils.ToolWindowsUtils
 import com.intellij.openapi.actionSystem.AnAction
@@ -21,12 +22,16 @@ class ArthasTestAction : AnAction("Test Arthas") {
         if (project == null) {
             return
         }
-        val telnetClient = TelnetUtils.createTelnetClient("127.0.0.1", 3658)
-        if (telnetClient == null) {
-            return
-        }
-        val tabId = "127.0.0.1:3658"
-        val processHandler = ArthasProcessManager.createProcessHandler(tabId, ArthasRemoteTelnetProcess(telnetClient))
-        ToolWindowsUtils.addArthasConsole(project, tabId, processHandler, forceAdd = true)
+
+        SocketUtils.findTcpListenProcess(3658)
+
+
+//        val telnetClient = TelnetUtils.createTelnetClient("127.0.0.1", 3658)
+//        if (telnetClient == null) {
+//            return
+//        }
+//        val tabId = "127.0.0.1:3658"
+//        val processHandler = ArthasProcessManager.createProcessHandler(tabId, ArthasRemoteTelnetProcess(telnetClient))
+//        ToolWindowsUtils.addArthasConsole(project, tabId, processHandler, forceAdd = true)
     }
 }
