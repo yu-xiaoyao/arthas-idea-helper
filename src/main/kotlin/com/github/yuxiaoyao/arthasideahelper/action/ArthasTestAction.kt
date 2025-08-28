@@ -1,13 +1,13 @@
 package com.github.yuxiaoyao.arthasideahelper.action
 
-import com.github.yuxiaoyao.arthasideahelper.process.ArthasProcessManager
+import com.github.yuxiaoyao.arthasideahelper.process.ArthasColoredRemoteProcessHandler
 import com.github.yuxiaoyao.arthasideahelper.process.ArthasRemoteTelnetProcess
-import com.github.yuxiaoyao.arthasideahelper.utils.SocketUtils
 import com.github.yuxiaoyao.arthasideahelper.utils.TelnetUtils
 import com.github.yuxiaoyao.arthasideahelper.utils.ToolWindowsUtils
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.Logger
+import kotlin.random.Random
 
 
 /**
@@ -23,7 +23,16 @@ class ArthasTestAction : AnAction("Test Arthas") {
             return
         }
 
-        SocketUtils.findTcpListenProcess(3658)
+        // SocketUtils.findTcpListenProcess(3658)
+
+
+        val telnetClient = TelnetUtils.createTelnetClient("127.0.0.1", 3658) ?: return
+        val process = ArthasRemoteTelnetProcess(telnetClient)
+        ToolWindowsUtils.addArthasConsole(
+            project,
+            "Test ${Random.nextInt(10000)}",
+            ArthasColoredRemoteProcessHandler(process)
+        )
 
 
 //        val telnetClient = TelnetUtils.createTelnetClient("127.0.0.1", 3658)

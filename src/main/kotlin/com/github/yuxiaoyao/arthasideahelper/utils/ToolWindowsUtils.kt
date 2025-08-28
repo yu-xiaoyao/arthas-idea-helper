@@ -41,6 +41,7 @@ object ToolWindowsUtils {
         project: Project,
         tabName: String,
         processHandler: ProcessHandler,
+        selected: Boolean = true,
         active: Boolean = true,
         forceAdd: Boolean = false
     ): Boolean {
@@ -54,7 +55,7 @@ object ToolWindowsUtils {
         }
 
         // 当前选中的
-        val selectedContent = toolWindow.contentManager.selectedContent
+//        val selectedContent = toolWindow.contentManager.selectedContent
 
 
         if (content == null) {
@@ -63,6 +64,9 @@ object ToolWindowsUtils {
 
             content = toolWindow.contentManager.factory.createContent(consoleView.component, tabName, false)
             toolWindow.contentManager.addContent(content)
+            if (selected) {
+                toolWindow.contentManager.setSelectedContent(content)
+            }
             processHandler.startNotify()
             isAdd = true
         }

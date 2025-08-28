@@ -50,7 +50,9 @@ class ArthasConsoleToolWindowsFactory : ToolWindowFactory {
         }
 
         val contentFactory = ContentFactory.getInstance()
-        val content = contentFactory.createContent(ui, "", false)
+        val content = contentFactory.createContent(ui, "ArthasConsole", false)
+        // 这个 tab 不能关闭
+        content.isCloseable = false
         toolWindow.contentManager.addContent(content)
     }
 }

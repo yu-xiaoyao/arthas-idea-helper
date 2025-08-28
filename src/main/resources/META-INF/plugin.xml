@@ -68,11 +68,13 @@
     <extensions defaultExtensionNs="com.intellij">
 
         <!-- secondary="true"    -->
-     <!--   <toolWindow id="ArthasConsole"
+        <toolWindow id="ArthasConsole"
                     factoryClass="com.github.yuxiaoyao.arthasideahelper.ArthasConsoleToolWindowsFactory"
                     anchor="bottom"
                     canCloseContents="true"
-        />-->
+                    doNotActivateOnStart="true"
+                    icon="AllIcons.Debugger.Console"
+        />
 
         <!--
                 <runConfigurationExtension
