@@ -15,8 +15,8 @@ import java.io.File
 
 object JavaUtils {
 
-    fun getJdks(): List<Sdk> {
-        return ProjectJdkTable.getInstance().allJdks.toList().filter { it.sdkType is JavaSdk }
+    fun getJdks(): MutableList<Sdk> {
+        return ProjectJdkTable.getInstance().allJdks.filter { it.sdkType is JavaSdk }.toMutableList()
     }
 
     fun getProjectJdk(project: Project): Sdk? {

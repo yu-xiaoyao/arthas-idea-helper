@@ -3,11 +3,14 @@ package com.github.yuxiaoyao.arthasideahelper.dialog
 import com.github.yuxiaoyao.arthasideahelper.MyBundle
 import com.github.yuxiaoyao.arthasideahelper.utils.ArthasTerminalUtils
 import com.github.yuxiaoyao.arthasideahelper.utils.JavaUtils
+import com.intellij.codeInspection.options.OptPane.table
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.SearchTextField
+import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.table.JBTable
+import com.intellij.util.ui.ListTableModel
 import com.sun.tools.attach.VirtualMachine
 import com.sun.tools.attach.VirtualMachineDescriptor
 import java.awt.BorderLayout
@@ -36,6 +39,16 @@ object JvmProcessDialog {
     val columnNames = arrayOf("PID", "Process Name")
 
     fun showAttachDialog(project: Project) {
+
+        val descriptors = VirtualMachine.list()
+        val data = descriptors.filter {
+            it.displayName().isNotEmpty()
+        }.sortedBy { it.id() }.map { arrayOf(it.id(), it.displayName()) }.toTypedArray()
+
+        TelnetDialogWrapper(project).show()
+    }
+
+    fun showAttachDialog2(project: Project) {
         val descriptors = VirtualMachine.list()
         val data = descriptors.filter {
             it.displayName().isNotEmpty()
