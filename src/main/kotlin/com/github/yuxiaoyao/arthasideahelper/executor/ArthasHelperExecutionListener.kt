@@ -1,6 +1,6 @@
 package com.github.yuxiaoyao.arthasideahelper.executor
 
-import com.github.yuxiaoyao.arthasideahelper.utils.ArthasRunningNotification
+import com.github.yuxiaoyao.arthasideahelper.utils.NotificationUtils
 import com.intellij.execution.ExecutionListener
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -23,7 +23,7 @@ class ArthasHelperExecutionListener : ExecutionListener {
         logger.info("Arthas Helper execution started. executorId = $executorId")
         if (executorId == ArthasExecutor.EXECUTOR_ID) {
 //            val projectSettings = ArthasHelperProjectSettings.getInstance(env.project)
-            ArthasRunningNotification.showArthasRunningNotification(env.project)
+            NotificationUtils.showArthasRunningNotification(env.project)
         }
         super.processStarted(executorId, env, handler)
     }

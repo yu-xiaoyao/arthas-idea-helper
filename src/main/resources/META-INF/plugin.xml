@@ -81,12 +81,19 @@
                         implementation="com.github.yuxiaoyao.arthasideaplugin.runconfig.ArthasRunConfigurationExtension"/>
         -->
 
-        <!-- 通知 -->
-        <notificationGroup displayType="STICKY_BALLOON"
+        <!-- BALLOON 通知 -->
+        <notificationGroup displayType="BALLOON"
                            id="com.github.yuxiaoyao.arthasideahelper.notification"
                            isLogByDefault="true"
                            toolWindowId="Event Log" bundle="messages.MyBundle"
                            key="notificationGroupId"/>
+
+        <!-- Arthas action STICKY_BALLOON -->
+        <notificationGroup displayType="STICKY_BALLOON"
+                           id="com.github.yuxiaoyao.arthasideahelper.ArthasNotification"
+                           isLogByDefault="true"
+                           toolWindowId="Event Log" bundle="messages.MyBundle"
+                           key="arthasActionNotificationGroupId"/>
 
 
         <applicationService

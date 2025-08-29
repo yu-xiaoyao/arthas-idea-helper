@@ -31,6 +31,11 @@ class ArthasHelperProjectSettings : PersistentStateComponent<ArthasHelperProject
     var tunnelServer: String = ArthasUtils.DEFAULT_TUNNEL_SERVER
     var agentId: String = ""
 
+    /**
+     * 最后使用的Jdk
+     */
+    var lastAttachJdkHome: String = ""
+
 
     override fun getState(): ArthasHelperProjectSettings = this
 

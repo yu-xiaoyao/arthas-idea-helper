@@ -16,5 +16,6 @@ val pluginId = PluginId.getId(PLUGIN_ID)
  */
 const val PLUGIN_NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.notification"
 
+const val ARTHAS_NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.ArthasNotification"
 
 const val ARTHAS_CONSOLE_TOOL_WINDOW_ID = "ArthasConsole"

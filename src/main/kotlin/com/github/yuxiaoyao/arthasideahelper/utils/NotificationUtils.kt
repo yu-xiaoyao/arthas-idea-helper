@@ -1,5 +1,6 @@
 package com.github.yuxiaoyao.arthasideahelper.utils
 
+import com.github.yuxiaoyao.arthasideahelper.ARTHAS_NOTIFICATION_ID
 import com.github.yuxiaoyao.arthasideahelper.MyBundle
 import com.github.yuxiaoyao.arthasideahelper.PLUGIN_NOTIFICATION_ID
 import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperProjectSettings
@@ -15,7 +16,27 @@ import com.intellij.openapi.ui.MessageType
  * @author kerryzhang on 2025/08/16
  */
 
-object ArthasRunningNotification {
+object NotificationUtils {
+
+    /**
+     * 发送通知(会自动隐藏)
+     */
+    fun sendNotification(
+        project: Project,
+        content: String,
+        title: String? = null,
+        messageType: MessageType = MessageType.INFO
+    ) {
+        val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup(PLUGIN_NOTIFICATION_ID)
+        val notification = notificationGroup.createNotification(content, messageType)
+        if (title != null) {
+            notification.setTitle(title)
+        } else {
+            notification.setTitle(MyBundle.message("running.notification.title"))
+        }
+        notification.notify(project)
+    }
+
 
     private var lastNotification: Notification? = null
 
@@ -39,7 +60,7 @@ object ArthasRunningNotification {
 
         val content = "http: $httpUrl. \n\n telnet: $telnetCommand"
 
-        val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup(PLUGIN_NOTIFICATION_ID)
+        val notificationGroup = NotificationGroupManager.getInstance().getNotificationGroup(ARTHAS_NOTIFICATION_ID)
 
         val notification = notificationGroup.createNotification(content, MessageType.INFO)
         notification.setTitle(MyBundle.message("running.notification.title"))
