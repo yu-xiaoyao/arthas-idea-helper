@@ -19,6 +19,7 @@ object JavaUtils {
         return ProjectJdkTable.getInstance().allJdks.filter { it.sdkType is JavaSdk }.toMutableList()
     }
 
+
     fun getProjectJdk(project: Project): Sdk? {
         val projectSdk = ProjectRootManager.getInstance(project).projectSdk
         if (projectSdk != null) {
@@ -29,24 +30,30 @@ object JavaUtils {
         return null
     }
 
-
-    fun getJavaExecutable(project: Project): String? {
-        val projectSdk = ProjectRootManager.getInstance(project).projectSdk
-        if (projectSdk != null) {
-            val homePath = projectSdk.homePath
-            if (homePath != null) {
-
-                val javaExecutable = if (SystemInfo.isWindows) {
-                    File(homePath, "bin/java.exe")
-                } else {
-                    File(homePath, "bin/java")
-                }
-                if (javaExecutable.exists()) {
-                    return javaExecutable.absolutePath
-                }
+    fun findJavaExecutable(homePath: String?): String? {
+        if (homePath != null) {
+            val javaExecutable = if (SystemInfo.isWindows) {
+                File(homePath, "bin/java.exe")
+            } else {
+                File(homePath, "bin/java")
+            }
+            if (javaExecutable.exists()) {
+                return javaExecutable.absolutePath
             }
         }
         return null
+    }
+
+    fun getJavaExecutable(sdk: Sdk?): String? {
+        if (sdk != null) {
+            return findJavaExecutable(sdk.homePath)
+        }
+        return null
+    }
+
+
+    fun getJavaExecutable(project: Project): String? {
+        return getJavaExecutable(ProjectRootManager.getInstance(project).projectSdk)
     }
 
 }

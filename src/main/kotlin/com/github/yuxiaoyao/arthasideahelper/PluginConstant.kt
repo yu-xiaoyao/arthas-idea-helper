@@ -19,3 +19,5 @@ const val PLUGIN_NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.notifi
 const val ARTHAS_NOTIFICATION_ID = "com.github.yuxiaoyao.arthasideahelper.ArthasNotification"
 
 const val ARTHAS_CONSOLE_TOOL_WINDOW_ID = "ArthasConsole"
+
+const val PROJECT_STORAGE_FILE = "ArthasHelperProject.xml"

@@ -20,14 +20,14 @@ import com.intellij.ui.dsl.builder.*
 class ArthasHelperProjectConfigurable(project: Project) :
     BoundConfigurable(MyBundle.message("arthas.projectSettings")) {
 
-    private val settings = ArthasHelperProjectSettings.getInstance(project)
+    private val state = ArthasHelperProjectSettings.getInstance(project).state
 
     override fun createPanel(): DialogPanel {
         return panel {
 
             row(MyBundle.message("arthas.telnetPort") + ":") {
                 val telnetPortField = intTextField(IntRange(-1, 65535))
-                    .bindIntText(settings::telnetPort)
+                    .bindIntText(state::telnetPort)
                 button(MyBundle.message("arthas.disablePort")) {
 //                    settings.telnetPort = -1
                     telnetPortField.text("-1")
@@ -41,7 +41,7 @@ class ArthasHelperProjectConfigurable(project: Project) :
 
             row(MyBundle.message("arthas.httpPort") + ":") {
                 val httpPortField = intTextField(IntRange(-1, 65535))
-                    .bindIntText(settings::httpPort)
+                    .bindIntText(state::httpPort)
                 button(MyBundle.message("arthas.disablePort")) {
 //                    settings.httpPort = -1
                     httpPortField.text("-1")
@@ -55,7 +55,7 @@ class ArthasHelperProjectConfigurable(project: Project) :
 
             row(MyBundle.message("arthas.ip") + ":") {
                 val ipTf = textField()
-                    .bindText(settings::ip)
+                    .bindText(state::ip)
                     .columns(COLUMNS_SHORT)
                 button(MyBundle.message("arthas.ipLocal")) {
 //                    settings.ip = "127.0.0.1"
@@ -69,7 +69,7 @@ class ArthasHelperProjectConfigurable(project: Project) :
 
             row(MyBundle.message("arthas.sessionTimeout") + ":") {
                 val sessionTimeout = intTextField(IntRange(1, Int.MAX_VALUE))
-                    .bindIntText(settings::sessionTimeout)
+                    .bindIntText(state::sessionTimeout)
                     .comment(MyBundle.message("arthas.sessionTimeoutComment"))
 
                 button(MyBundle.message("arthas.sessionTimeoutDefault")) {
@@ -83,19 +83,19 @@ class ArthasHelperProjectConfigurable(project: Project) :
 
             row {
                 enableAdvancedFieldsCheckBox = checkBox(MyBundle.message("arthas.tunnelEnableConfig"))
-                    .bindSelected(settings::tunnelEnable)
+                    .bindSelected(state::tunnelServerEnable)
             }
 
             row(MyBundle.message("arthas.tunnelAppName") + ":") {
                 textField()
-                    .bindText(settings::appName)
+                    .bindText(state::appName)
                     .columns(COLUMNS_MEDIUM)
                     .enabledIf(enableAdvancedFieldsCheckBox.selected)
             }
 
             row(MyBundle.message("arthas.tunnelServer") + ":") {
                 val tunnelServer = textField()
-                    .bindText(settings::tunnelServer)
+                    .bindText(state::tunnelServerUrl)
                     .columns(COLUMNS_MEDIUM)
                     .validationOnInput {
                         validateTunnelServer(it.text)
@@ -109,7 +109,7 @@ class ArthasHelperProjectConfigurable(project: Project) :
 
             row(MyBundle.message("arthas.tunnelAgentId") + ":") {
                 textField()
-                    .bindText(settings::agentId)
+                    .bindText(state::agentId)
                     .columns(COLUMNS_MEDIUM)
                     .enabledIf(enableAdvancedFieldsCheckBox.selected)
             }

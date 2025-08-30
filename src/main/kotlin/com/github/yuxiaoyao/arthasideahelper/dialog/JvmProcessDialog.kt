@@ -3,14 +3,14 @@ package com.github.yuxiaoyao.arthasideahelper.dialog
 import com.github.yuxiaoyao.arthasideahelper.MyBundle
 import com.github.yuxiaoyao.arthasideahelper.utils.ArthasTerminalUtils
 import com.github.yuxiaoyao.arthasideahelper.utils.JavaUtils
-import com.intellij.codeInspection.options.OptPane.table
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.SearchTextField
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.table.JBTable
-import com.intellij.util.ui.ListTableModel
 import com.sun.tools.attach.VirtualMachine
 import com.sun.tools.attach.VirtualMachineDescriptor
 import java.awt.BorderLayout
@@ -21,9 +21,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
-import javax.swing.JPanel
-import javax.swing.ListSelectionModel
-import javax.swing.RowFilter
+import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.table.DefaultTableModel
@@ -33,6 +31,8 @@ import javax.swing.table.TableRowSorter
 /**
  * @author kerryzhang on 2025/08/26
  */
+
+
 
 object JvmProcessDialog {
 
@@ -45,7 +45,7 @@ object JvmProcessDialog {
             it.displayName().isNotEmpty()
         }.sortedBy { it.id() }.map { arrayOf(it.id(), it.displayName()) }.toTypedArray()
 
-        TelnetDialogWrapper(project).show()
+        JvmProcessDialogWrapper2(project).show()
     }
 
     fun showAttachDialog2(project: Project) {

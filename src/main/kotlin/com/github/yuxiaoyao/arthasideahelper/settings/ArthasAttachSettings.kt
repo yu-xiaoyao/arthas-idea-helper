@@ -7,33 +7,33 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
 
+
 /**
- * Project-level settings for Arthas Helper
- * @author kerryzhang on 2025/08/15
+ * @author kerryzhang on 2025/08/30
  */
 
+
 @State(
-    name = "ArthasHelperProjectSettings",
+    name = "ArthasAttachSettings",
     storages = [Storage(PROJECT_STORAGE_FILE)]
 )
 @Service(Service.Level.PROJECT)
-class ArthasHelperProjectSettings : PersistentStateComponent<ArthasParameterState> {
+class ArthasAttachSettings : PersistentStateComponent<ArthasParameterState> {
 
     private var state: ArthasParameterState = ArthasParameterState()
 
-
-    override fun getState(): ArthasParameterState = state
+    override fun getState(): ArthasParameterState {
+        return state
+    }
 
     override fun loadState(state: ArthasParameterState) {
-//        XmlSerializerUtil.copyBean(state, this)
         this.state = state
     }
 
     companion object {
-
         @JvmStatic
-        fun getInstance(project: Project): ArthasHelperProjectSettings {
-            val settings = project.getService(ArthasHelperProjectSettings::class.java)
+        fun getInstance(project: Project): ArthasAttachSettings {
+            val settings = project.getService(ArthasAttachSettings::class.java)
             settings.state.initWithProject(project)
             return settings
         }

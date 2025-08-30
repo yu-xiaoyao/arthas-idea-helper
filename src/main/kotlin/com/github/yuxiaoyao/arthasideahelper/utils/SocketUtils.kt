@@ -9,8 +9,10 @@ import org.jetbrains.jps.util.SystemInfo
 
 object SocketUtils {
 
+    const val LOCAL_IP = "127.0.0.1"
+    const val ANY_IP = "0.0.0.0"
 
-    fun findTcpListenProcess(port: Int): Long {
+    fun findTcpListenPid(port: Int): Long {
 
         if (SystemInfo.isWindows) {
             val command = arrayOf("netstat", "-ano", "-p", "TCP")

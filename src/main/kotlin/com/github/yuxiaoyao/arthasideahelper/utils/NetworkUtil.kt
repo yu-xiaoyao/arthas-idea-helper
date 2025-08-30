@@ -15,8 +15,8 @@ object NetworkUtil {
     var telnetPort = ArthasUtils.DEFAULT_TELNET_PORT
 
     fun getAvailableHttPort(): Int {
-        for (i in 0 until MAX_RETRY_ATTEMPTS) {
-            val port = findAvailablePort(httpPort)
+        repeat(MAX_RETRY_ATTEMPTS) {
+            val port = checkPortAvailable(httpPort)
             if (port > 0) {
                 return port
             }
@@ -26,18 +26,18 @@ object NetworkUtil {
     }
 
     fun getAvailableTelnetPort(): Int {
-        for (i in 0 until MAX_RETRY_ATTEMPTS) {
-            val port = findAvailablePort(telnetPort)
+        repeat(MAX_RETRY_ATTEMPTS) {
+            val port = checkPortAvailable(telnetPort)
             if (port > 0) {
                 return port
             }
-            httpPort += 1
+            telnetPort += 1
         }
         return -1
     }
 
 
-    private fun findAvailablePort(port: Int): Int {
+    fun checkPortAvailable(port: Int): Int {
         return try {
             java.net.ServerSocket(port).use { socket ->
 //                socket.reuseAddress = true

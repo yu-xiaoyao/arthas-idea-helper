@@ -69,7 +69,7 @@ class ArthasProgramRunner : DefaultJavaProgramRunner() {
         if (state is JavaCommandLineState) {
             val arthasAgentPath = getArthasAgentPath(env.project)
             if (arthasAgentPath.isNotEmpty()) {
-                val agentParms = ArthasUtils.buildProjectAgentParams(env.project)
+                val agentParms = ArthasUtils.buildProjectAgentJarParams(env.project)
 
                 logger.info("javaagent parameters: $agentParms")
 

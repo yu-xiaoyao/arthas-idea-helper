@@ -50,7 +50,7 @@ object NotificationUtils {
             }
         }
 
-        val projectSettings = ArthasHelperProjectSettings.getInstance(project)
+        val projectSettings = ArthasHelperProjectSettings.getInstance(project).state
         if (!ArthasUtils.isProjectHasArthasAgent(projectSettings)) {
             return
         }

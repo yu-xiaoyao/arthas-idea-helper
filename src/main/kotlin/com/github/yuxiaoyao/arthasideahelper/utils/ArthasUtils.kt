@@ -2,6 +2,7 @@ package com.github.yuxiaoyao.arthasideahelper.utils
 
 import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperProjectSettings
 import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings
+import com.github.yuxiaoyao.arthasideahelper.settings.ArthasParameterState
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import java.io.File
@@ -12,7 +13,7 @@ import java.io.File
  */
 object ArthasUtils {
 
-    const val LOCAL_IP = "127.0.0.1"
+    const val LOCAL_IP = SocketUtils.LOCAL_IP
     const val DEFAULT_HTTP_PORT = 8563
     const val DEFAULT_TELNET_PORT = 3658
     const val AGENT_JAR = "arthas-agent.jar"
@@ -137,14 +138,14 @@ object ArthasUtils {
     }
 
 
-    fun isProjectHasArthasAgent(settings: ArthasHelperProjectSettings): Boolean {
+    fun isProjectHasArthasAgent(settings: ArthasParameterState): Boolean {
         if (settings.httpPort == -1 && settings.telnetPort == -1) {
-            if (!settings.tunnelEnable) {
+            if (!settings.tunnelServerEnable) {
                 return false
             }
 
             // tunnelEnable = true, 但是 url 为空
-            if (settings.tunnelServer.isBlank()) {
+            if (settings.tunnelServerUrl.isBlank()) {
                 return false
             }
         }
@@ -152,8 +153,57 @@ object ArthasUtils {
     }
 
 
-    fun buildProjectAgentParams(project: Project): String {
-        val projectSettings = ArthasHelperProjectSettings.getInstance(project)
+    fun buildBootJarParams(state: ArthasParameterState, attachOnly: Boolean = true): String {
+        val args = mutableListOf<String>()
+
+        if (attachOnly) {
+            args.add("--attach-only")
+        }
+
+        args.add("--telnet-port")
+        if (state.telnetEnable) {
+            args.add("${state.telnetPort}")
+        } else {
+            args.add("-1")
+        }
+
+        args.add("--http-port")
+        if (state.httpEnable) {
+            args.add("${state.httpPort}")
+        } else {
+            args.add("-1")
+        }
+
+        if (SocketUtils.LOCAL_IP != state.ip) {
+            args.add("--target-ip")
+            args.add(state.ip)
+        }
+
+        if (DEFAULT_SESSION_TIMEOUT != state.sessionTimeout) {
+            args.add("--session-timeout")
+            args.add("${state.sessionTimeout}}")
+        }
+
+        if (state.tunnelServerEnable) {
+            if (state.tunnelServerUrl.isNotEmpty()) {
+                args.add("--tunnel-server")
+                args.add("'${state.tunnelServerUrl}'")
+            }
+            if (state.appName.isNotEmpty()) {
+                args.add("--app-name")
+                args.add(state.appName)
+            }
+            if (state.agentId.isNotEmpty()) {
+                args.add("--agent-id")
+                args.add(state.agentId)
+            }
+        }
+
+        return args.joinToString(" ")
+    }
+
+    fun buildProjectAgentJarParams(project: Project): String {
+        val projectSettings = ArthasHelperProjectSettings.getInstance(project).state
 
         if (!isProjectHasArthasAgent(projectSettings)) {
             return ""
@@ -186,8 +236,8 @@ object ArthasUtils {
             args.add("${ARTHAS_KEY_SESSION_TIMEOUT}=${projectSettings.sessionTimeout}")
         }
 
-        if (projectSettings.tunnelEnable && projectSettings.tunnelServer.isNotBlank()) {
-            args.add("${ARTHAS_KEY_TUNNEL_SERVER}=${projectSettings.tunnelServer}")
+        if (projectSettings.tunnelServerEnable && projectSettings.tunnelServerUrl.isNotBlank()) {
+            args.add("${ARTHAS_KEY_TUNNEL_SERVER}=${projectSettings.tunnelServerUrl}")
             if (projectSettings.appName.isNotBlank()) {
                 args.add("${ARTHAS_KEY_APP_NAME}=${projectSettings.appName}")
             }
