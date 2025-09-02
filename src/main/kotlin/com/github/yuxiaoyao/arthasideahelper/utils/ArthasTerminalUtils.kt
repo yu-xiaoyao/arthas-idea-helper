@@ -1,6 +1,7 @@
 package com.github.yuxiaoyao.arthasideahelper.utils
 
 
+import com.github.yuxiaoyao.arthasideahelper.MyBundle
 import com.github.yuxiaoyao.arthasideahelper.settings.ArthasHelperSettings
 import com.github.yuxiaoyao.arthasideahelper.settings.ArthasParameterState
 import com.intellij.execution.configurations.GeneralCommandLine
@@ -8,8 +9,11 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ColoredProcessHandler
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.MessageType
+import com.intellij.openapi.ui.Messages
 import org.jetbrains.plugins.terminal.TerminalToolWindowManager
 import org.jetbrains.plugins.terminal.runner.LocalTerminalStartCommandBuilder
 
@@ -22,40 +26,37 @@ private val logger = Logger.getInstance(ArthasTerminalUtils::class.java)
 
 object ArthasTerminalUtils {
 
-    fun openConsoleByPid(
+    fun executeByPid(
         project: Project,
         javaExecutable: String,
         pid: Any,
-        state: ArthasParameterState
+        state: ArthasParameterState,
+        commandTimeout: Long = 10 * 1000L
     ): Boolean {
 
-        logger.info("openConsoleByPid. javaExecutable = $javaExecutable, pid = $pid")
+        logger.info("openConsoleByPid. javaExecutable = $javaExecutable, pid = $pid. commandTimeout = $commandTimeout")
 
         val arthasBootPath = ArthasHelperSettings.getInstance().arthasBootPath
         if (arthasBootPath.isEmpty()) {
-            NotificationUtils.sendNotification(
-                project,
-                "Cannot find arthas boot path",
-                messageType = MessageType.WARNING
-            )
+            Messages.showWarningDialog(project, "Cannot find arthas boot path", MyBundle.message("pluginName"))
             return false
         }
         if (state.telnetEnable) {
             if (state.telnetPort != NetworkUtil.checkPortAvailable(state.telnetPort)) {
-                NotificationUtils.sendNotification(
+                Messages.showWarningDialog(
                     project,
                     "Current Telnet port Unavailable ${state.telnetPort}",
-                    messageType = MessageType.WARNING
+                    MyBundle.message("pluginName")
                 )
                 return false
             }
         }
         if (state.httpEnable) {
             if (state.httpPort != NetworkUtil.checkPortAvailable(state.httpPort)) {
-                NotificationUtils.sendNotification(
+                Messages.showWarningDialog(
                     project,
-                    "Current Http port Unavailable ${state.httpPort}",
-                    messageType = MessageType.WARNING
+                    "Current Http port Unavailable ${state.telnetPort}",
+                    MyBundle.message("pluginName")
                 )
                 return false
             }
@@ -66,23 +67,47 @@ object ArthasTerminalUtils {
 
         // attach-only
         val commandLine = GeneralCommandLine(javaExecutable)
-            .withParameters("-jar", arthasBootPath, pid.toString(), params)
-        val processHandler = CapturingProcessHandler(commandLine)
-        val output = processHandler.runProcess(10 * 1000, true)
-//        val output = processHandler.runProcess(10 * 1000, true)
+            .withParameters("-jar", arthasBootPath, pid.toString())
+        commandLine.addParameters(params)
 
-        if (output.isCancelled || output.isTimeout) {
-            return false
-        }
-        logger.info("openConsoleByPid. $pid, exitCode. ${output.exitCode}")
-        logger.info("openConsoleByPid. $pid,stdout. ${output.stdout}")
+        logger.info("Run command. commandTimeout = $commandTimeout. ${commandLine.commandLineString}")
 
-        if (output.exitCode == 0) {
-            // success
+        ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Attach Arthas $pid") {
+            override fun run(indicator: ProgressIndicator) {
+                val processHandler = CapturingProcessHandler(commandLine)
+                val output = if (commandTimeout > 0L)
+                    processHandler.runProcess(commandTimeout.toInt(), true)
+                else
+                    processHandler.runProcess()
 
-            return true
-        }
-        return false
+                logger.info("命令结果. $pid, exitCode: ${output.exitCode}. $output")
+
+                if (output.exitCode != 0 || output.isTimeout || output.isCancelled) {
+//                    ApplicationManager.getApplication().invokeLater({
+//                        Messages.showErrorDialog(project, "Attached Arthas $pid", "Attached Arthas $pid")
+//                    }, ModalityState.any())
+                    /*
+                    SwingUtilities.invokeLater {
+                        Messages.showErrorDialog(project, "Attached Arthas $pid", "Attached Arthas $pid")
+                    }
+                     */
+                } else {
+//                    ApplicationManager.getApplication().invokeLater({
+//                        Messages.showInfoMessage(project, "Attached Arthas $pid", "Attached Arthas $pid")
+//                    }, ModalityState.any())
+
+                    NotificationUtils.sendNotification(project, "TTTTTTTTTTTT")
+
+                    /*
+                    SwingUtilities.invokeLater {
+                        Messages.showInfoMessage(project, "Attached Arthas $pid", "Attached Arthas $pid")
+                    }
+                     */
+                }
+            }
+
+        })
+        return true
     }
 
     /**

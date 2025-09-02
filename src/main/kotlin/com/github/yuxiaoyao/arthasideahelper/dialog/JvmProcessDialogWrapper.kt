@@ -8,9 +8,7 @@ import com.github.yuxiaoyao.arthasideahelper.utils.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.ui.DialogWrapper
@@ -314,7 +312,7 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
                 telnetPortField = intTextField(IntRange(1, 65535))
                     .bindIntText(state::telnetPort)
                     .enabledIf(telnetCheckBox.selected)
-                button(MyBundle.message("arthas.randomPort")) {
+                button("Random") {
                     generateDataAsync(telnetPortField, NetworkUtil::getAvailableTelnetPort)
                 }.enabledIf(telnetCheckBox.selected)
 
@@ -328,7 +326,7 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
                 httpPortField = intTextField(IntRange(1, 65535))
                     .bindIntText(state::httpPort)
                     .enabledIf(httpCheckBox.selected)
-                button(MyBundle.message("arthas.randomPort")) {
+                button("Random") {
                     generateDataAsync(httpPortField, NetworkUtil::getAvailableHttPort)
                 }.enabledIf(httpCheckBox.selected)
             }
@@ -340,10 +338,10 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
             }
 
             row("") {
-                button(MyBundle.message("arthas.ipLocal")) {
+                button("Local IP") {
                     ipTextField.text(SocketUtils.LOCAL_IP)
                 }
-                button(MyBundle.message("arthas.ipAny")) {
+                button("Any IP") {
                     ipTextField.text(SocketUtils.ANY_IP)
                 }
             }
@@ -353,7 +351,7 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
                     .bindIntText(state::sessionTimeout)
                     .comment(MyBundle.message("arthas.sessionTimeoutComment"))
 
-                button(MyBundle.message("arthas.sessionTimeoutDefault")) {
+                button("Default") {
                     sessionTimeoutTextField.component.text = "${ArthasUtils.DEFAULT_SESSION_TIMEOUT}"
                 }
             }
@@ -367,14 +365,14 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
             row(MyBundle.message("arthas.tunnelAppName") + ":") {
                 tunnelServerAppNameTextField = textField()
                     .bindText(state::appName)
-                    .columns(COLUMNS_MEDIUM)
+                    .columns(COLUMNS_SHORT)
                     .enabledIf(tunnelServerEnableCheckBox.selected)
             }
 
             row(MyBundle.message("arthas.tunnelServer") + ":") {
                 tunnelServerUrlTextField = textField()
                     .bindText(state::tunnelServerUrl)
-                    .columns(COLUMNS_MEDIUM)
+                    .columns(COLUMNS_SHORT)
                     .validationOnInput {
                         validateTunnelServerUrl(it.text)
                     }
@@ -390,7 +388,7 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
             row(MyBundle.message("arthas.tunnelAgentId") + ":") {
                 tunnelServerAgentIdTextField = textField()
                     .bindText(state::agentId)
-                    .columns(COLUMNS_MEDIUM)
+                    .columns(COLUMNS_SHORT)
                     .enabledIf(tunnelServerEnableCheckBox.selected)
             }
         }
@@ -558,27 +556,16 @@ class JvmProcessDialogWrapper2(private val project: Project) : DialogWrapper(tru
         val selectedRow = table.selectedRow
         if (selectedRow >= 0) {
             val pid = table.model.getValueAt(selectedRow, 0)
-            ProgressManager.getInstance().run(object : Task.Backgroundable(project, "AsyncTask") {
-                override fun run(indicator: ProgressIndicator) {
-                    val result = ArthasTerminalUtils.openConsoleByPid(project, javaExecutable, pid, currentState)
-                    logger.info("openConsoleByPid. pid = $pid, result = $result")
-                    if (result) {
-                        // save action
-                    }
-                }
-            })
 
-
-//            NotificationUtils.showArthasRunningNotification(project)
-
-//            if (settings.telnetEnable) {
-//                ArthasTerminalUtils.createBootConsole(project, javaExecutable, valueAt as String)
-//            } else {
-//                if (settings.httpEnable) {
-//                    ArthasTerminalUtils.createBootConsole(project, javaExecutable, valueAt as String)
-//                }
-//            }
-            close(OK_EXIT_CODE)
+            val result = ArthasTerminalUtils.executeByPid(
+                project,
+                javaExecutable,
+                pid,
+                currentState
+            )
+            if (result) {
+                close(OK_EXIT_CODE)
+            }
         }
     }
 

@@ -153,7 +153,7 @@ object ArthasUtils {
     }
 
 
-    fun buildBootJarParams(state: ArthasParameterState, attachOnly: Boolean = true): String {
+    fun buildBootJarParams(state: ArthasParameterState, attachOnly: Boolean = true): MutableList<String> {
         val args = mutableListOf<String>()
 
         if (attachOnly) {
@@ -199,7 +199,8 @@ object ArthasUtils {
             }
         }
 
-        return args.joinToString(" ")
+//        return args.joinToString(" ")
+        return args
     }
 
     fun buildProjectAgentJarParams(project: Project): String {
